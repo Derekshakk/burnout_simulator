@@ -53,6 +53,8 @@ void dispose() {
 
 **Scenarios are hardcoded** in `lib/data/demo_scenarios.dart` as a `const List<GameScenario>`. See `/add-scenario` skill for the correct way to extend them.
 
+**Character names in shared UI are dynamic.** All shared UI and scenario text must reference the active character dynamically. Never hard-code Alex, Jordan, or another character name outside character-specific data files.
+
 ## Educational language rules
 
 Use supportive, nonjudgmental wording in all user-facing text. Avoid "good choice" / "bad choice". Prefer: "This choice reduced immediate demands." Frame rest as necessary, not as failure. State that experiences vary. See existing `educationalFeedback` strings in `demo_scenarios.dart` for reference tone.

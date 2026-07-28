@@ -8,12 +8,14 @@ class ScenarioCard extends StatelessWidget {
   final GameScenario scenario;
   final int scenarioNumber;
   final int totalScenarios;
+  final String characterName;
 
   const ScenarioCard({
     super.key,
     required this.scenario,
     required this.scenarioNumber,
     required this.totalScenarios,
+    required this.characterName,
   });
 
   @override
@@ -65,7 +67,7 @@ class ScenarioCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'What should Alex do?',
+            'What should $characterName do?',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontSize: 12,
               color: AppColors.textMuted,

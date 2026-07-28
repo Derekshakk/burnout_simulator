@@ -1,8 +1,13 @@
 import 'package:flutter/foundation.dart';
+import 'character_profile.dart';
 import 'game_choice.dart';
+import 'game_scenario.dart';
 
 class GameState extends ChangeNotifier {
-  int _timeMinutes = 480; // 8:00 AM
+  CharacterProfile? _selectedCharacter;
+  List<GameScenario> _activeScenarios = const [];
+
+  int _timeMinutes = 480;
   double _energy = 80;
   double _focus = 70;
   double _stress = 20;
@@ -11,12 +16,15 @@ class GameState extends ChangeNotifier {
   double _selfAdvocacy = 50;
   final List<String> _completedTasks = [];
   final List<String> _selectedChoiceHistory = [];
+  final Set<String> _appliedTags = {};
   bool _isFinished = false;
   bool _reduceVisualEffects = false;
   int _currentScenarioIndex = 0;
   String? _pendingFeedback;
   String? _lastChoiceLabel;
 
+  CharacterProfile? get selectedCharacter => _selectedCharacter;
+  List<GameScenario> get activeScenarios => List.unmodifiable(_activeScenarios);
   int get timeMinutes => _timeMinutes;
   double get energy => _energy;
   double get focus => _focus;
@@ -27,6 +35,7 @@ class GameState extends ChangeNotifier {
   List<String> get completedTasks => List.unmodifiable(_completedTasks);
   List<String> get selectedChoiceHistory =>
       List.unmodifiable(_selectedChoiceHistory);
+  Set<String> get appliedTags => Set.unmodifiable(_appliedTags);
   bool get isFinished => _isFinished;
   bool get reduceVisualEffects => _reduceVisualEffects;
   int get currentScenarioIndex => _currentScenarioIndex;
@@ -49,6 +58,9 @@ class GameState extends ChangeNotifier {
     return 'high';
   }
 
+  bool get hasSensoryOverload => burnoutLevel >= 80;
+  bool get hasSevereOverload => burnoutLevel >= 90;
+
   String get currentTimeLabel {
     final hours = _timeMinutes ~/ 60;
     final minutes = _timeMinutes % 60;
@@ -59,6 +71,37 @@ class GameState extends ChangeNotifier {
 
   bool get canDoHighEnergyActivity => burnoutLevel < 70 && _energy > 30;
   bool get canDoLowEnergyActivity => burnoutLevel < 85 && _energy > 10;
+
+  bool isChoiceAvailable(GameChoice choice) {
+    if (choice.minEnergyRequired != null &&
+        _energy < choice.minEnergyRequired!) {
+      return false;
+    }
+    if (choice.maxBurnoutAllowed != null &&
+        burnoutLevel > choice.maxBurnoutAllowed!) {
+      return false;
+    }
+    return true;
+  }
+
+  String? carryoverNote(GameScenario scenario) {
+    if (scenario.carryoverNotes == null || _appliedTags.isEmpty) return null;
+    for (final tag in _appliedTags) {
+      final note = scenario.carryoverNotes![tag];
+      if (note != null) return note;
+    }
+    return null;
+  }
+
+  void selectCharacter(
+    CharacterProfile character,
+    List<GameScenario> scenarios,
+  ) {
+    _selectedCharacter = character;
+    _activeScenarios = scenarios;
+    _resetProgress();
+    notifyListeners();
+  }
 
   void applyChoice(GameChoice choice) {
     _energy = (_energy + choice.energyDelta).clamp(0, 100);
@@ -72,19 +115,35 @@ class GameState extends ChangeNotifier {
     if (choice.taskCompleted != null) {
       _completedTasks.add(choice.taskCompleted!);
     }
+    if (choice.tag != null) {
+      _appliedTags.add(choice.tag!);
+    }
     _selectedChoiceHistory.add(choice.label);
     _lastChoiceLabel = choice.label;
     _pendingFeedback = choice.educationalFeedback;
     notifyListeners();
   }
 
-  void advanceScenario(int totalScenarios) {
+  void advanceScenario(List<GameScenario> scenarios) {
     _pendingFeedback = null;
     _lastChoiceLabel = null;
-    if (_currentScenarioIndex + 1 >= totalScenarios) {
+    if (_currentScenarioIndex + 1 >= scenarios.length) {
       _isFinished = true;
+      final endTimeLabel = scenarios[_currentScenarioIndex].endTimeLabel;
+      if (endTimeLabel != null) {
+        _timeMinutes = _minutesFromTimeLabel(endTimeLabel);
+      }
     } else {
       _currentScenarioIndex++;
+      final nextScenarioTime = _minutesFromTimeLabel(
+        scenarios[_currentScenarioIndex].timeLabel,
+      );
+      // Choices affect the clock within a scenario.  Waiting until the next
+      // scheduled block never moves the day backward, and fills the ordinary
+      // gaps between classes.
+      if (_timeMinutes < nextScenarioTime) {
+        _timeMinutes = nextScenarioTime;
+      }
     }
     notifyListeners();
   }
@@ -94,20 +153,40 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reset() {
+  void _resetProgress() {
+    final c = _selectedCharacter;
     _timeMinutes = 480;
-    _energy = 80;
-    _focus = 70;
-    _stress = 20;
-    _motivation = 75;
-    _lifeSatisfaction = 70;
-    _selfAdvocacy = 50;
+    _energy = c?.initialEnergy ?? 80;
+    _focus = c?.initialFocus ?? 70;
+    _stress = c?.initialStress ?? 20;
+    _motivation = c?.initialMotivation ?? 75;
+    _lifeSatisfaction = c?.initialLifeSatisfaction ?? 70;
+    _selfAdvocacy = c?.initialSelfAdvocacy ?? 50;
     _completedTasks.clear();
     _selectedChoiceHistory.clear();
+    _appliedTags.clear();
     _isFinished = false;
     _currentScenarioIndex = 0;
     _pendingFeedback = null;
     _lastChoiceLabel = null;
+  }
+
+  void reset() {
+    _resetProgress();
     notifyListeners();
+  }
+
+  int _minutesFromTimeLabel(String label) {
+    final match = RegExp(r'^(\d{1,2}):(\d{2}) (AM|PM)$').firstMatch(label);
+    if (match == null) {
+      throw ArgumentError.value(label, 'label', 'Invalid time label');
+    }
+
+    var hour = int.parse(match.group(1)!);
+    final minute = int.parse(match.group(2)!);
+    final period = match.group(3)!;
+    if (hour == 12) hour = 0;
+    if (period == 'PM') hour += 12;
+    return hour * 60 + minute;
   }
 }

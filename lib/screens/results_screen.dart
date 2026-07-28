@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
-import '../data/demo_character.dart';
-import '../data/demo_scenarios.dart';
+import '../models/character_profile.dart';
 import '../models/game_state.dart';
 import '../widgets/pixel_panel.dart';
 import '../widgets/site_navigation.dart';
@@ -16,7 +15,7 @@ class ResultsScreen extends StatelessWidget {
 
   void _playAgain(BuildContext context) {
     gameState.reset();
-    Navigator.pushReplacementNamed(context, AppRoutes.play);
+    Navigator.pushReplacementNamed(context, AppRoutes.select);
   }
 
   @override
@@ -50,7 +49,7 @@ class ResultsScreen extends StatelessWidget {
                               const SizedBox(height: 24),
                               _ActivityPanel(gameState: gameState),
                               const SizedBox(height: 24),
-                              _ReflectionPanel(),
+                              _ReflectionPanel(gameState: gameState),
                               const SizedBox(height: 24),
                               _PlayAgainPanel(
                                 onPlayAgain: () => _playAgain(context),
@@ -86,7 +85,7 @@ class ResultsScreen extends StatelessWidget {
                                           gameState: gameState,
                                         ),
                                         const SizedBox(height: 24),
-                                        _ReflectionPanel(),
+                                        _ReflectionPanel(gameState: gameState),
                                       ],
                                     ),
                                   ),
@@ -123,13 +122,14 @@ class _ResultsHeader extends StatelessWidget {
   }
 
   String _burnoutMessage() {
+    final name = gameState.selectedCharacter?.name ?? 'The character';
     switch (gameState.burnoutRange) {
       case 'high':
-        return 'Alex\'s burnout reached a high level by the end of the day. Recovery will be important.';
+        return '$name\'s burnout reached a high level by the end of the day. Recovery will be important.';
       case 'elevated':
-        return 'Alex\'s burnout is elevated but manageable. Some strategies helped reduce demands.';
+        return '$name\'s burnout is elevated but manageable. Some strategies helped reduce demands.';
       default:
-        return 'Alex maintained a lower burnout level through the day. Good balance of demand and recovery.';
+        return '$name maintained a lower burnout level through the day. A good balance of demand and recovery.';
     }
   }
 
@@ -137,6 +137,7 @@ class _ResultsHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final burnoutColor = _burnoutColor();
     final range = gameState.burnoutRange.toUpperCase();
+    final name = gameState.selectedCharacter?.name ?? 'Character';
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -165,7 +166,7 @@ class _ResultsHeader extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           A11yHeading(
-            'Alex\'s Day is Complete',
+            '$name\'s Day is Complete',
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 32,
@@ -342,7 +343,13 @@ class _ChoiceHistoryPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final history = gameState.selectedChoiceHistory;
-    final scenarioTitles = demoScenarios.map((s) => s.title).toList();
+    final scenarioTitles = gameState.activeScenarios
+        .map((s) => s.title)
+        .toList();
+    final scenarioTimes = gameState.activeScenarios
+        .map((s) => s.timeLabel)
+        .toList();
+    final name = gameState.selectedCharacter?.name ?? 'the character';
 
     return PixelPanel(
       title: 'CHOICES MADE',
@@ -350,7 +357,7 @@ class _ChoiceHistoryPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Here is how Alex\'s day unfolded through your choices:',
+            'Here is how $name\'s day unfolded through your choices:',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 13,
@@ -362,9 +369,7 @@ class _ChoiceHistoryPanel extends StatelessWidget {
             final i = entry.key;
             final choice = entry.value;
             final title = i < scenarioTitles.length ? scenarioTitles[i] : '';
-            final time = i < demoScenarios.length
-                ? demoScenarios[i].timeLabel
-                : '';
+            final time = i < scenarioTimes.length ? scenarioTimes[i] : '';
             return _ChoiceHistoryRow(
               scenarioTitle: title,
               time: time,
@@ -444,6 +449,33 @@ class _ChoiceHistoryRow extends StatelessWidget {
   }
 }
 
+const _helpfulTags = {
+  'planned_morning',
+  'sensory_break_taken',
+  'mindful_transition',
+  'advocated_role',
+  'quiet_lunch',
+  'stim_recovery',
+  'routine_adapted',
+  'asked_for_help',
+  'sought_clarity',
+  'initiated_structure',
+  'sensory_refuge',
+  'earbuds_strategy',
+  'asked_specific',
+  'special_interest_recovery',
+};
+
+const _demandingTags = {
+  'chaotic_morning',
+  'pushed_sensory',
+  'stayed_silent',
+  'routine_panic',
+  'masked_confusing',
+  'masked_lunch',
+  'guessed_revision',
+};
+
 class _StrategiesSummary extends StatelessWidget {
   final GameState gameState;
 
@@ -451,24 +483,47 @@ class _StrategiesSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final choices = gameState.selectedChoiceHistory;
-    final helpful = <String>[];
-    final demanding = <String>[];
+    final history = gameState.selectedChoiceHistory;
 
-    for (final choice in choices) {
-      if (choice.contains('smaller steps') ||
-          choice.contains('movement break') ||
-          choice.contains('visual design') ||
-          choice.contains('rest') ||
-          choice.contains('music')) {
-        helpful.add(choice);
-      }
-      if (choice.contains('without planning') ||
-          choice.contains('silently') ||
-          choice.contains('everything is finished')) {
-        demanding.add(choice);
-      }
-    }
+    final helpful = history
+        .asMap()
+        .entries
+        .where((e) {
+          final scenarios = gameState.activeScenarios;
+          if (e.key < scenarios.length) {
+            final scenario = scenarios[e.key];
+            for (final choice in scenario.choices) {
+              if (choice.label == e.value &&
+                  choice.tag != null &&
+                  _helpfulTags.contains(choice.tag)) {
+                return true;
+              }
+            }
+          }
+          return false;
+        })
+        .map((e) => e.value)
+        .toList();
+
+    final demanding = history
+        .asMap()
+        .entries
+        .where((e) {
+          final scenarios = gameState.activeScenarios;
+          if (e.key < scenarios.length) {
+            final scenario = scenarios[e.key];
+            for (final choice in scenario.choices) {
+              if (choice.label == e.value &&
+                  choice.tag != null &&
+                  _demandingTags.contains(choice.tag)) {
+                return true;
+              }
+            }
+          }
+          return false;
+        })
+        .map((e) => e.value)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,6 +629,7 @@ class _ActivityPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final canHigh = gameState.canDoHighEnergyActivity;
     final canLow = gameState.canDoLowEnergyActivity;
+    final char = gameState.selectedCharacter;
 
     return PixelPanel(
       title: 'END-OF-DAY CAPACITY',
@@ -586,7 +642,7 @@ class _ActivityPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Can Alex do a favorite activity?',
+            'Can ${char?.name ?? 'the character'} do a favorite activity?',
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 14,
@@ -595,7 +651,8 @@ class _ActivityPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _ActivityRow(
-            activity: demoCharacter.highEnergyActivity,
+            activity:
+                char?.highEnergyActivity ?? 'a high-energy preferred activity',
             label: 'HIGH ENERGY',
             available: canHigh,
             unavailableReason: canHigh
@@ -604,7 +661,8 @@ class _ActivityPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _ActivityRow(
-            activity: demoCharacter.lowEnergyActivity,
+            activity:
+                char?.lowEnergyActivity ?? 'a low-energy preferred activity',
             label: 'LOW ENERGY',
             available: canLow,
             unavailableReason: canLow
@@ -616,10 +674,10 @@ class _ActivityPanel extends StatelessWidget {
           const SizedBox(height: 10),
           ReadingText(
             canHigh
-                ? 'Alex has enough capacity to engage in a preferred creative project tonight.'
+                ? '${char?.name ?? 'The character'} has enough capacity to engage in a preferred activity tonight.'
                 : canLow
-                ? 'Alex can enjoy music, though the higher-demand creative project is beyond reach right now.'
-                : 'Alex needs rest above all else tonight. Recovery is not giving up — it is what makes tomorrow possible.',
+                ? '${char?.name ?? 'The character'} can manage a low-energy activity, though the higher-demand option is beyond reach right now.'
+                : '${char?.name ?? 'The character'} needs rest above all else tonight. Recovery is not giving up — it is what makes tomorrow possible.',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 13,
@@ -712,8 +770,23 @@ class _ActivityRow extends StatelessWidget {
 }
 
 class _ReflectionPanel extends StatelessWidget {
+  final GameState gameState;
+
+  const _ReflectionPanel({required this.gameState});
+
+  String _reflectionPrompt(CharacterProfile? char) {
+    return 'Which choice best matched ${char?.name ?? 'the character'}\'s needs, and what made it helpful?';
+  }
+
+  String _reflectionBody(CharacterProfile? char) {
+    final name = char?.name ?? 'the character';
+    return 'Consider: Which strategies reduced demand or provided clarity? Were there moments where speaking up changed the outcome? What would have happened if $name had more energy at the end of the day?';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final char = gameState.selectedCharacter;
+
     return PixelPanel(
       title: 'REFLECTION PROMPT',
       borderColor: AppColors.accentPurple.withValues(alpha: 0.4),
@@ -724,7 +797,7 @@ class _ReflectionPanel extends StatelessWidget {
           Icon(Icons.auto_awesome, color: AppColors.accentPurple, size: 20),
           const SizedBox(height: 12),
           Text(
-            'Which choice best matched Alex\'s needs, and what made it helpful?',
+            _reflectionPrompt(char),
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 16,
@@ -734,7 +807,7 @@ class _ReflectionPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ReadingText(
-            'Consider: Which strategies reduced demand without removing Alex from participation? Were there moments where speaking up changed the outcome? What would have happened if Alex had more energy at the end of the day?',
+            _reflectionBody(char),
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 13,
@@ -745,7 +818,7 @@ class _ReflectionPanel extends StatelessWidget {
           Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 12),
           Text(
-            'Different players may make different choices — and different people in real life will have different needs. There is no single correct path through Alex\'s day.',
+            'Different players may make different choices — and different people in real life will have different needs. There is no single correct path through this day.',
             style: TextStyle(
               color: AppColors.textMuted,
               fontSize: 12,
@@ -773,7 +846,7 @@ class _PlayAgainPanel extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: onPlayAgain,
             icon: const Icon(Icons.refresh, size: 16),
-            label: const Text('Play Again'),
+            label: const Text('Choose a Character'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
@@ -794,7 +867,7 @@ class _PlayAgainPanel extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Try different choices to see how the outcomes change. No path through the simulation is a failure.',
+            'Try a different character or different choices to see how the outcomes change. No path through the simulation is a failure.',
             style: TextStyle(
               color: AppColors.textMuted,
               fontSize: 11,

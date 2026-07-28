@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
-import '../data/demo_character.dart';
-import '../data/demo_scenarios.dart';
+import '../models/game_scenario.dart';
 import '../models/game_state.dart';
 import '../widgets/choice_button.dart';
 import '../widgets/educational_feedback_card.dart';
@@ -25,6 +24,11 @@ class _SimulationScreenState extends State<SimulationScreen> {
   void initState() {
     super.initState();
     widget.gameState.addListener(_onStateChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && widget.gameState.selectedCharacter == null) {
+        Navigator.pushReplacementNamed(context, AppRoutes.select);
+      }
+    });
   }
 
   @override
@@ -58,7 +62,10 @@ class _SimulationScreenState extends State<SimulationScreen> {
                 ],
               ),
               if (!reduceFx && burnout >= 40)
-                _BurnoutOverlay(burnoutLevel: burnout),
+                _BurnoutOverlay(
+                  burnoutLevel: burnout,
+                  severe: widget.gameState.hasSevereOverload,
+                ),
             ],
           ),
         );
@@ -235,7 +242,9 @@ class _ScenePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scenario = demoScenarios[gameState.currentScenarioIndex];
+    final scenarios = gameState.activeScenarios;
+    if (scenarios.isEmpty) return const SizedBox.shrink();
+    final scenario = scenarios[gameState.currentScenarioIndex];
 
     return PixelPanel(
       title: 'SCENE',
@@ -246,6 +255,7 @@ class _ScenePanel extends StatelessWidget {
           sceneTone: scenario.sceneTone,
           burnoutLevel: gameState.burnoutLevel,
           reduceEffects: gameState.reduceVisualEffects,
+          hasSensoryOverload: gameState.hasSensoryOverload,
           height: isMobile ? 160.0 : 200.0,
         ),
       ),
@@ -257,12 +267,14 @@ class _SceneArtwork extends StatelessWidget {
   final String sceneTone;
   final double burnoutLevel;
   final bool reduceEffects;
+  final bool hasSensoryOverload;
   final double height;
 
   const _SceneArtwork({
     required this.sceneTone,
     required this.burnoutLevel,
     required this.reduceEffects,
+    required this.hasSensoryOverload,
     required this.height,
   });
 
@@ -297,6 +309,8 @@ class _SceneArtwork extends StatelessWidget {
           ),
           if (burnoutLevel >= 70)
             Positioned(top: 8, right: 8, child: _BrainFogBadge()),
+          if (hasSensoryOverload)
+            Positioned(top: 8, left: 8, child: _SensoryOverloadBadge()),
         ],
       ),
     );
@@ -324,6 +338,38 @@ class _BrainFogBadge extends StatelessWidget {
             'Brain fog',
             style: TextStyle(
               color: AppColors.accentAmber,
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SensoryOverloadBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: AppColors.background.withValues(alpha: 0.85),
+        border: Border.all(
+          color: AppColors.accentRed.withValues(alpha: 0.7),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.hearing_disabled, color: AppColors.accentRed, size: 10),
+          SizedBox(width: 4),
+          Text(
+            'Sensory overload',
+            style: TextStyle(
+              color: AppColors.accentRed,
               fontSize: 9,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -384,14 +430,12 @@ class _MorningScene extends StatelessWidget {
               ),
             ),
           ),
-          // Desk
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(height: 20, color: const Color(0xFF3d2b1f)),
           ),
-          // Desk surface
           Positioned(
             bottom: 20,
             left: 0,
@@ -440,7 +484,6 @@ class _MorningScene extends StatelessWidget {
               ),
             ),
           ),
-          // Character
           Positioned(
             bottom: 20,
             left: 80,
@@ -477,7 +520,6 @@ class _ClassScene extends StatelessWidget {
               ),
             ),
           ),
-          // Whiteboard/projector screen
           Positioned(
             top: 12,
             left: 20,
@@ -501,7 +543,6 @@ class _ClassScene extends StatelessWidget {
               ),
             ),
           ),
-          // Background desks
           Positioned(
             bottom: 60,
             left: 0,
@@ -511,14 +552,12 @@ class _ClassScene extends StatelessWidget {
               children: [_SmallDesk(), _SmallDesk(), _SmallDesk()],
             ),
           ),
-          // Front desk
           Positioned(
             bottom: 0,
             left: 30,
             right: 30,
             child: Container(height: 10, color: const Color(0xFF3d2b1f)),
           ),
-          // Character at desk
           Positioned(
             bottom: 8,
             left: 90,
@@ -528,7 +567,6 @@ class _ClassScene extends StatelessWidget {
               posture: 'sitting',
             ),
           ),
-          // Note on desk
           Positioned(
             bottom: 10,
             left: 50,
@@ -576,7 +614,6 @@ class _EveningScene extends StatelessWidget {
               ),
             ),
           ),
-          // Stars
           Positioned(
             top: 10,
             left: 30,
@@ -624,7 +661,6 @@ class _EveningScene extends StatelessWidget {
               ],
             ),
           ),
-          // Desk
           Positioned(
             bottom: 0,
             left: 0,
@@ -637,7 +673,6 @@ class _EveningScene extends StatelessWidget {
             right: 0,
             child: Container(height: 4, color: const Color(0xFF3d2b1f)),
           ),
-          // Books, slightly messy
           Positioned(
             bottom: 24,
             right: 20,
@@ -656,7 +691,6 @@ class _EveningScene extends StatelessWidget {
               ],
             ),
           ),
-          // Tired character (slumped head)
           Positioned(
             bottom: 20,
             left: 70,
@@ -714,8 +748,11 @@ class _StatusPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final charName = (gameState.selectedCharacter?.name ?? 'Character')
+        .toUpperCase();
+
     return PixelPanel(
-      title: 'STATUS — ${demoCharacter.name.toUpperCase()}',
+      title: 'STATUS — $charName',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -723,6 +760,10 @@ class _StatusPanel extends StatelessWidget {
             value: gameState.burnoutLevel,
             range: gameState.burnoutRange,
           ),
+          if (gameState.hasSensoryOverload) ...[
+            const SizedBox(height: 8),
+            _SensoryOverloadWarning(severe: gameState.hasSevereOverload),
+          ],
           const SizedBox(height: 12),
           Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 12),
@@ -816,6 +857,58 @@ class _StatusPanel extends StatelessWidget {
   }
 }
 
+class _SensoryOverloadWarning extends StatelessWidget {
+  final bool severe;
+
+  const _SensoryOverloadWarning({required this.severe});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = severe ? AppColors.accentRed : AppColors.accentAmber;
+    final label = severe ? 'Severe sensory overload' : 'Sensory overload';
+    final detail = severe
+        ? 'Some actions are no longer accessible. Recovery is the priority.'
+        : 'Sensory demands have exceeded a sustainable threshold.';
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.hearing_disabled, color: color, size: 12),
+              const SizedBox(width: 6),
+              Text(
+                label.toUpperCase(),
+                style: TextStyle(
+                  color: color,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            detail,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 10,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MobileStatusBar extends StatelessWidget {
   final GameState gameState;
 
@@ -835,6 +928,10 @@ class _MobileStatusBar extends StatelessWidget {
             value: gameState.burnoutLevel,
             range: gameState.burnoutRange,
           ),
+          if (gameState.hasSensoryOverload) ...[
+            const SizedBox(height: 6),
+            _SensoryOverloadWarning(severe: gameState.hasSevereOverload),
+          ],
           const SizedBox(height: 8),
           Row(
             children: [
@@ -891,29 +988,36 @@ class _InteractionContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scenarios = gameState.activeScenarios;
+    if (scenarios.isEmpty) return const SizedBox.shrink();
+
     final idx = gameState.currentScenarioIndex;
-    final scenario = demoScenarios[idx];
-    final total = demoScenarios.length;
+    final scenario = scenarios[idx];
+    final total = scenarios.length;
 
     if (gameState.pendingFeedback != null) {
       return EducationalFeedbackCard(
         choiceLabel: gameState.lastChoiceLabel ?? '',
         feedbackText: gameState.pendingFeedback!,
         isLastScenario: idx + 1 >= total,
-        onContinue: () => gameState.advanceScenario(total),
+        onContinue: () => gameState.advanceScenario(scenarios),
       );
     }
+
+    final carryover = gameState.carryoverNote(scenario);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (carryover != null) _CarryoverNote(text: carryover),
         ScenarioCard(
           scenario: scenario,
           scenarioNumber: idx + 1,
           totalScenarios: total,
+          characterName: gameState.selectedCharacter?.name ?? 'the character',
         ),
         const SizedBox(height: 16),
-        _ChoiceList(gameState: gameState, scenarioIndex: idx),
+        _ChoiceList(gameState: gameState, scenario: scenario),
         const SizedBox(height: 24),
         _ProgressIndicator(current: idx + 1, total: total),
       ],
@@ -921,15 +1025,55 @@ class _InteractionContent extends StatelessWidget {
   }
 }
 
-class _ChoiceList extends StatelessWidget {
-  final GameState gameState;
-  final int scenarioIndex;
+class _CarryoverNote extends StatelessWidget {
+  final String text;
 
-  const _ChoiceList({required this.gameState, required this.scenarioIndex});
+  const _CarryoverNote({required this.text});
 
   @override
   Widget build(BuildContext context) {
-    final scenario = demoScenarios[scenarioIndex];
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.accentPurple.withValues(alpha: 0.06),
+        border: Border(
+          left: BorderSide(
+            color: AppColors.accentPurple.withValues(alpha: 0.5),
+            width: 3,
+          ),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.history, color: AppColors.accentPurple, size: 14),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                height: 1.5,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChoiceList extends StatelessWidget {
+  final GameState gameState;
+  final GameScenario scenario;
+
+  const _ChoiceList({required this.gameState, required this.scenario});
+
+  @override
+  Widget build(BuildContext context) {
     final labels = ['A', 'B', 'C', 'D'];
 
     return Column(
@@ -938,26 +1082,20 @@ class _ChoiceList extends StatelessWidget {
         final i = entry.key;
         final choice = entry.value;
 
-        // Check availability for the third scenario choices at high burnout
-        bool isDisabled = false;
-        String? disabledReason;
-
-        if (scenarioIndex == demoScenarios.length - 1 && i == 0) {
-          if (!gameState.canDoHighEnergyActivity) {
-            isDisabled = true;
-            disabledReason =
-                'Alex doesn\'t have enough energy for this right now. High burnout makes sustained effort very difficult, even when we want to do it.';
-          }
-        }
+        final bool isAvailable = gameState.isChoiceAvailable(choice);
+        final String? disabledReason = isAvailable
+            ? null
+            : (choice.unavailableReason ??
+                  'This option is not accessible right now. Current capacity makes this action out of reach. This is not a choice — it is a limit.');
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 10),
           child: ChoiceButton(
             choice: choice,
             choiceLetter: labels[i],
-            isDisabled: isDisabled,
+            isDisabled: !isAvailable,
             disabledReason: disabledReason,
-            onPressed: isDisabled ? null : () => gameState.applyChoice(choice),
+            onPressed: isAvailable ? () => gameState.applyChoice(choice) : null,
           ),
         );
       }).toList(),
@@ -1001,19 +1139,26 @@ class _ProgressIndicator extends StatelessWidget {
 
 class _BurnoutOverlay extends StatelessWidget {
   final double burnoutLevel;
+  final bool severe;
 
-  const _BurnoutOverlay({required this.burnoutLevel});
+  const _BurnoutOverlay({required this.burnoutLevel, required this.severe});
 
   @override
   Widget build(BuildContext context) {
-    final opacity = burnoutLevel < 70
+    final baseOpacity = burnoutLevel < 70
         ? (burnoutLevel - 40) / 30 * 0.05
         : 0.05 + (burnoutLevel - 70) / 30 * 0.07;
 
     return Positioned.fill(
       child: IgnorePointer(
-        child: Container(
-          color: const Color(0xFFd29922).withValues(alpha: opacity),
+        child: Stack(
+          children: [
+            Container(
+              color: const Color(0xFFd29922).withValues(alpha: baseOpacity),
+            ),
+            if (severe)
+              Container(color: const Color(0xFFf85149).withValues(alpha: 0.06)),
+          ],
         ),
       ),
     );

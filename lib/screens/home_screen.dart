@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _startGame() {
     widget.gameState.reset();
-    Navigator.pushNamed(context, AppRoutes.play);
+    Navigator.pushNamed(context, AppRoutes.select);
   }
 
   @override
@@ -585,7 +585,7 @@ class _AboutSection extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: ReadingText(
-              'Project Ignite is an educational simulation designed to help players understand neurodivergent burnout from the inside. You guide Alex — a fictional high school student — through a single day, making choices that affect energy, focus, stress, and motivation.',
+              'Project Ignite is an educational simulation designed to help players understand neurodivergent burnout from the inside. You guide a fictional high school student through a single day, making choices that affect energy, focus, stress, and motivation.',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 16,
@@ -597,7 +597,7 @@ class _AboutSection extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: ReadingText(
-              'As burnout builds, activities that Alex normally enjoys may become unavailable — not as punishment, but to illustrate a real experience: wanting to do something does not always mean having the capacity to do it. By the end of the day, players see how their choices shaped Alex\'s state and which strategies helped most.',
+              'As burnout builds, activities a student normally enjoys may become unavailable — not as punishment, but to illustrate a real experience: wanting to do something does not always mean having the capacity to do it. By the end of the day, players see how their choices shaped the student\'s state and which strategies helped most.',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 16,
@@ -658,7 +658,7 @@ class _FeatureGrid extends StatelessWidget {
         icon: Icons.fork_right,
         title: 'Choices with lasting consequences',
         description:
-            'Every decision affects Alex\'s energy, focus, stress, and motivation for the rest of the day.',
+            'Every decision affects the student\'s energy, focus, stress, and motivation for the rest of the day.',
       ),
       _FeatureItem(
         icon: Icons.battery_alert,
@@ -686,9 +686,9 @@ class _FeatureGrid extends StatelessWidget {
       ),
       _FeatureItem(
         icon: Icons.people_outline,
-        title: 'Different experiences planned',
+        title: 'Two characters to explore',
         description:
-            'Future versions will include ADHD, autism, and AuDHD characters with distinct profiles.',
+            'Choose from fictional students with distinct strengths, triggers, and recovery strategies that shape the day differently.',
       ),
     ];
 
@@ -1004,7 +1004,7 @@ class _ResourcesSection extends StatelessWidget {
                 ),
                 SizedBox(height: 14),
                 Text(
-                  'The character Alex and all scenarios in this prototype are fictional and created solely for educational purposes. They do not represent any real individuals or the full range of neurodivergent experiences.',
+                  'The characters and scenarios in this prototype are fictional and created solely for educational purposes. They do not represent any real individuals or the full range of neurodivergent experiences.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 14,

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
-import '../data/demo_character.dart';
 import '../models/game_state.dart';
 import '../widgets/pixel_panel.dart';
 import '../widgets/site_navigation.dart';
@@ -14,7 +13,7 @@ class GameOverviewScreen extends StatelessWidget {
 
   void _startGame(BuildContext context) {
     gameState.reset();
-    Navigator.pushNamed(context, AppRoutes.play);
+    Navigator.pushNamed(context, AppRoutes.select);
   }
 
   @override
@@ -144,40 +143,12 @@ class _CharacterPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PixelPanel(
-      title: 'PROTOTYPE CHARACTER',
+      title: 'CHARACTERS',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              color: AppColors.surfaceVariant,
-              child: Icon(Icons.person, color: AppColors.accent, size: 48),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              demoCharacter.name,
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          Center(
-            child: Text(
-              '${demoCharacter.age} · ${demoCharacter.context}',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Divider(color: AppColors.border, height: 1),
-          const SizedBox(height: 16),
           ReadingText(
-            demoCharacter.shortDescription,
+            'Choose from two fictional characters — each with a distinct neurodivergent profile, different strengths, and different recovery strategies. The same scenarios unfold differently depending on who you play as.',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 13,
@@ -186,26 +157,25 @@ class _CharacterPanel extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _CharacterSection(
-            label: 'STRENGTHS',
-            color: AppColors.accentGreen,
-            items: demoCharacter.strengths,
-          ),
-          const SizedBox(height: 12),
-          _CharacterSection(
-            label: 'SUPPORTIVE STRATEGIES',
-            color: AppColors.focusColor,
-            items: demoCharacter.supportiveStrategies,
-          ),
-          const SizedBox(height: 12),
-          _CharacterSection(
-            label: 'FAVORITE ACTIVITIES',
-            color: AppColors.motivationColor,
-            items: [
-              'Low energy: ${demoCharacter.lowEnergyActivity}',
-              'High energy: ${demoCharacter.highEnergyActivity}',
+            label: 'ALEX · ADHD · AGE 16',
+            color: AppColors.accent,
+            items: const [
+              'Strengths: Creativity, quick idea generation, deep focus on preferred tasks',
+              'Triggers: Unstructured task lists, sensory noise, mismatched roles',
+              'Recovery: Movement breaks, music, creative projects',
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          _CharacterSection(
+            label: 'JORDAN · AUTISM · AGE 17',
+            color: AppColors.accentPurple,
+            items: const [
+              'Strengths: Pattern recognition, systematic thinking, deep interests',
+              'Triggers: Unexpected schedule changes, sensory overload, ambiguous instructions',
+              'Recovery: Special interest time, quiet spaces, fidgets and sensory toys',
+            ],
+          ),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -213,7 +183,7 @@ class _CharacterPanel extends StatelessWidget {
               border: Border.all(color: AppColors.border, width: 1),
             ),
             child: Text(
-              demoCharacter.disclaimer,
+              'These characters are fictional and created for educational purposes. They do not represent all people with ADHD, autism, or any neurodivergent experience. Neurodivergent experiences vary widely.',
               style: TextStyle(
                 color: AppColors.textMuted,
                 fontSize: 11,
@@ -294,7 +264,7 @@ class _GameMechanicsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ReadingText(
-            'You guide Alex through three scenarios during a single school day. Each choice you make affects Alex\'s internal state — and some choices have ripple effects that change what\'s possible later.',
+            'You guide your chosen character through five scenarios during a single school day. Each choice affects their internal state — and some choices have ripple effects that change what\'s possible later.',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
@@ -307,14 +277,14 @@ class _GameMechanicsPanel extends StatelessWidget {
             icon: Icons.bar_chart,
             color: AppColors.focusColor,
             description:
-                'Track Energy, Focus, Stress, Motivation, Life Satisfaction, and Self-Advocacy. These interact to determine Alex\'s burnout level. No single meter is the goal — balance matters.',
+                'Track Energy, Focus, Stress, Motivation, Life Satisfaction, and Self-Advocacy. These interact to determine burnout level. No single meter is the goal — balance matters.',
           ),
           _MechanicBlock(
             title: 'Burnout Level',
             icon: Icons.warning_amber_outlined,
             color: AppColors.accentAmber,
             description:
-                'Burnout is derived from multiple factors: low energy, high stress, low motivation, and limited self-advocacy. As burnout rises, the interface reflects Alex\'s experience, and some activities may become unavailable.',
+                'Burnout is derived from multiple factors: low energy, high stress, low motivation, and limited self-advocacy. As burnout rises, the interface reflects the character\'s experience — and some choices may become genuinely unavailable.',
           ),
           _MechanicBlock(
             title: 'Educational Feedback',
@@ -328,7 +298,7 @@ class _GameMechanicsPanel extends StatelessWidget {
             icon: Icons.summarize_outlined,
             color: AppColors.motivationColor,
             description:
-                'See a summary of Alex\'s day: what helped, what contributed to burnout, and whether Alex has enough capacity left for a favorite activity.',
+                'See a summary of the character\'s day: what helped, what contributed to burnout, and whether they have enough capacity left for a favorite activity.',
           ),
           const SizedBox(height: 8),
           Divider(color: AppColors.border, height: 1),
@@ -403,19 +373,29 @@ class _ScenarioList extends StatelessWidget {
   Widget build(BuildContext context) {
     final scenarios = [
       (
-        '8:00 AM',
-        'Morning Planning',
-        'A long task list and three ways to start the day.',
+        'Morning',
+        'Starting the Day',
+        'Managing demands, routines, and the first challenges of the day.',
       ),
       (
-        '10:30 AM',
-        'Class Project',
-        'An assigned role and the option to advocate for a better fit.',
+        'Mid-Morning',
+        'Unexpected Demands',
+        'A sensory challenge or disrupted plan that requires adapting.',
       ),
       (
-        '4:00 PM',
-        'End of Day',
-        'Limited energy, unfinished work, and a choice about rest.',
+        'Late Morning',
+        'Social & Academic Pressure',
+        'Group work, self-advocacy, and navigating unclear expectations.',
+      ),
+      (
+        'Lunchtime',
+        'Recovery or Depletion',
+        'A critical opportunity to restore energy — or let demands compound.',
+      ),
+      (
+        'Evening',
+        'End-of-Day Capacity',
+        'Limited reserves and a real choice about what still matters tonight.',
       ),
     ];
 

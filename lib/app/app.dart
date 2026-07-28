@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../accessibility/accessibility_overlay.dart';
 import '../accessibility/accessibility_state.dart';
 import '../models/game_state.dart';
+import '../screens/character_select_screen.dart';
 import '../screens/game_overview_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/results_screen.dart';
@@ -123,6 +124,13 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
                     settings: settings,
                     builder: (_) => _a11yRoute(
                       () => GameOverviewScreen(gameState: _gameState),
+                    ),
+                  );
+                case AppRoutes.select:
+                  return MaterialPageRoute(
+                    settings: settings,
+                    builder: (_) => _a11yRoute(
+                      () => CharacterSelectScreen(gameState: _gameState),
                     ),
                   );
                 case AppRoutes.play:

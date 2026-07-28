@@ -11,6 +11,10 @@ class GameChoice {
   final int timeMinutesDelta;
   final String? taskCompleted;
   final String educationalFeedback;
+  final String? tag;
+  final double? minEnergyRequired;
+  final double? maxBurnoutAllowed;
+  final String? unavailableReason;
 
   const GameChoice({
     required this.id,
@@ -25,5 +29,9 @@ class GameChoice {
     this.timeMinutesDelta = 0,
     this.taskCompleted,
     required this.educationalFeedback,
+    this.tag,
+    this.minEnergyRequired,
+    this.maxBurnoutAllowed,
+    this.unavailableReason,
   });
 }
