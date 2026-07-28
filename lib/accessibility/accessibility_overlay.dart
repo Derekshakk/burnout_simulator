@@ -47,7 +47,7 @@ class _AccessibilityOverlayState extends State<AccessibilityOverlay> {
   String _getPageText() {
     // Best-effort page text for Read Aloud. A future revision can walk the
     // semantics tree; for now this provides a stable, non-empty utterance.
-    return 'Page content for Burnout: One More Day. Use the accessibility '
+    return 'Page content for Project Ignite. Use the accessibility '
         'panel to navigate and read content on this page.';
   }
 

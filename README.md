@@ -1,4 +1,4 @@
-# burnout_simulator
+# Project Ignite
 
 An interactive website and game about autism and ADHD burnout.
 

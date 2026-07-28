@@ -1,6 +1,6 @@
 {
-    "name": "burnout_simulator",
-    "short_name": "burnout_simulator",
+    "name": "Project Ignite",
+    "short_name": "Project Ignite",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -115,7 +115,7 @@ class _Header extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           A11yHeading(
-            'Burnout: One More Day',
+            'Project Ignite',
             style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 36,

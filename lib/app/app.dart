@@ -80,7 +80,7 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
             WidgetsBinding.instance.platformDispatcher.views.first,
           ).copyWith(textScaler: TextScaler.linear(_a11y.fontSizeScale)),
           child: MaterialApp(
-            title: 'Burnout: One More Day',
+            title: 'Project Ignite',
             debugShowCheckedModeBanner: false,
             theme: _buildTheme(),
             navigatorKey: _navigatorKey,

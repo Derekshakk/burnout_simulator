@@ -201,7 +201,7 @@ class _HeroText extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         A11yHeading(
-          'Burnout:\nOne More Day',
+          'Project\nIgnite',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 42,
@@ -578,14 +578,14 @@ class _AboutSection extends StatelessWidget {
           _SectionLabel(text: 'ABOUT THIS GAME'),
           const SizedBox(height: 20),
           A11yHeading(
-            'About Burnout: One More Day',
+            'About Project Ignite',
             style: Theme.of(context).textTheme.displaySmall,
           ),
           const SizedBox(height: 20),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: ReadingText(
-              'Burnout: One More Day is an educational simulation designed to help players understand neurodivergent burnout from the inside. You guide Alex — a fictional high school student — through a single day, making choices that affect energy, focus, stress, and motivation.',
+              'Project Ignite is an educational simulation designed to help players understand neurodivergent burnout from the inside. You guide Alex — a fictional high school student — through a single day, making choices that affect energy, focus, stress, and motivation.',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 16,
@@ -1038,7 +1038,7 @@ class _Footer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Burnout: One More Day — Educational Prototype for SNP-REACH 2026',
+                  'Project Ignite — Educational Prototype for SNP-REACH 2026',
                   style: TextStyle(color: AppColors.textMuted, fontSize: 12),
                 ),
                 SizedBox(height: 4),
@@ -1053,7 +1053,7 @@ class _Footer extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'Burnout: One More Day — Educational Prototype for SNP-REACH 2026',
+                    'Project Ignite — Educational Prototype for SNP-REACH 2026',
                     style: TextStyle(color: AppColors.textMuted, fontSize: 12),
                   ),
                 ),

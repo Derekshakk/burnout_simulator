@@ -146,7 +146,7 @@ class _LogoWidget extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Text(
-          'BURNOUT: ONE MORE DAY',
+          'PROJECT IGNITE',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 13,

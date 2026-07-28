@@ -109,7 +109,7 @@ class _SimNavBar extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'BURNOUT: ONE MORE DAY',
+              'PROJECT IGNITE',
               style: TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 13,
