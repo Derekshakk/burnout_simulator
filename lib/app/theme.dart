@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../accessibility/accessibility_state.dart';
+import '../accessibility/accessibility_state.dart'
+    show AccessibilityState, FontChoice;
 
 /// A complete color palette. Two instances exist — the default dark palette and
 /// the high-contrast palette — and [AppColors] exposes whichever is active.
@@ -153,9 +154,7 @@ class AppColors {
 }
 
 class AppTheme {
-  /// Readable-font family. Verdana is bundled as an asset (see pubspec.yaml) so
-  /// it renders on every platform, including the web CanvasKit renderer which
-  /// only honors bundled fonts. The fallback stack covers non-web targets.
+  /// Bundled font families (see pubspec.yaml / fonts/).
   static const String readableFontFamily = 'Verdana';
   static const List<String> readableFontFallback = <String>[
     'Tahoma',
@@ -166,8 +165,23 @@ class AppTheme {
     'sans-serif',
   ];
 
+  static const String openDyslexicFontFamily = 'OpenDyslexic';
+  static const List<String> openDyslexicFontFallback = <String>['sans-serif'];
+
   /// Applies AccessibilityState typography overrides on top of a base theme.
   static ThemeData withA11y(ThemeData base, AccessibilityState a11y) {
+    final (
+      String? overrideFamily,
+      List<String>? overrideFallback,
+    ) = switch (a11y.fontChoice) {
+      FontChoice.readable => (readableFontFamily, readableFontFallback),
+      FontChoice.openDyslexic => (
+        openDyslexicFontFamily,
+        openDyslexicFontFallback,
+      ),
+      FontChoice.system => (null, null),
+    };
+
     TextStyle applyA11y(TextStyle? s) {
       final style = s ?? const TextStyle();
       final baseHeight = style.height ?? 1.4;
@@ -175,10 +189,8 @@ class AppTheme {
       return style.copyWith(
         height: (baseHeight * a11y.lineHeightScale).clamp(0.8, 3.0),
         letterSpacing: (baseSpacing + a11y.letterSpacingDelta).clamp(-0.5, 8.0),
-        fontFamily: a11y.readableFont ? readableFontFamily : style.fontFamily,
-        fontFamilyFallback: a11y.readableFont
-            ? readableFontFallback
-            : style.fontFamilyFallback,
+        fontFamily: overrideFamily ?? style.fontFamily,
+        fontFamilyFallback: overrideFallback ?? style.fontFamilyFallback,
       );
     }
 

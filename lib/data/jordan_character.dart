@@ -4,7 +4,7 @@ const jordanCharacter = CharacterProfile(
   id: 'jordan',
   name: 'Jordan',
   age: 17,
-  context: 'High school junior',
+  context: 'High school student',
   shortDescription:
       'Jordan navigates a world built for neurotypical processing. Routines provide stability, sensory environments affect capacity, and masking — performing expected social behavior — has a real and cumulative energy cost.',
   neurodivergenceType: 'Autism',

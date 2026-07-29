@@ -14,7 +14,7 @@ Read `lib/data/demo_character.dart` and `lib/models/character_profile.dart` in f
 Confirm with the user (or infer from $ARGUMENTS):
 - **Name** — fictional first name only
 - **Age** — a plausible school-age integer
-- **Context** — e.g., "High school student", "Middle school student"
+- **Context** — use the exact format `"High school student"` for high school characters. Do **not** use year labels (freshman, sophomore, junior, senior). Only use a different value if the character is genuinely outside high school (e.g., "Middle school student", "College student").
 - **Short description** — 1–2 sentences on their specific profile (attention regulation, sensory sensitivities, executive function patterns, etc.)
 - **Strengths** — 3–5 items, positive framing
 - **Supportive strategies** — 3–5 strategies that work for this character specifically

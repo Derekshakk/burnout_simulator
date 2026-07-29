@@ -72,6 +72,16 @@ flutter:
         - asset: fonts/Verdana-BoldItalic.ttf
           weight: 700
           style: italic
+    - family: OpenDyslexic
+      fonts:
+        - asset: fonts/OpenDyslexic-Regular.otf
+        - asset: fonts/OpenDyslexic-Bold.otf
+          weight: 700
+        - asset: fonts/OpenDyslexic-Italic.otf
+          style: italic
+        - asset: fonts/OpenDyslexic-BoldItalic.otf
+          weight: 700
+          style: italic
 
   # To add assets to your application, add an assets section, like this:
   # assets:

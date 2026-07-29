@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../app/theme.dart';
-import 'accessibility_state.dart';
+import 'accessibility_state.dart' show AccessibilityState, FontChoice;
 import 'tts_controller.dart';
 import 'tts_service.dart';
 
@@ -240,12 +240,8 @@ class _LeftColumn extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _SectionLabel('Appearance'),
-        _ToggleRow(
-          label: 'Readable Font',
-          value: a11y.readableFont,
-          onToggle: a11y.toggleReadableFont,
-          description: 'Clear sans-serif for body text',
-        ),
+        _FontChoiceGroup(a11y: a11y),
+        const SizedBox(height: 4),
         _ToggleRow(
           label: 'High Contrast',
           value: a11y.highContrast,
@@ -553,6 +549,116 @@ class _Switch extends StatelessWidget {
             decoration: BoxDecoration(
               color: value ? AppColors.textPrimary : AppColors.textSecondary,
               shape: BoxShape.circle,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Three-way font selector: System / Readable (Verdana) / OpenDyslexic.
+/// Only one option can be active at a time, so there is no conflicting state.
+class _FontChoiceGroup extends StatelessWidget {
+  final AccessibilityState a11y;
+
+  const _FontChoiceGroup({required this.a11y});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Font',
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            _FontButton(
+              label: 'System',
+              description: 'Default',
+              selected: a11y.fontChoice == FontChoice.system,
+              onTap: () => a11y.setFontChoice(FontChoice.system),
+            ),
+            const SizedBox(width: 6),
+            _FontButton(
+              label: 'Readable',
+              description: 'Verdana',
+              selected: a11y.fontChoice == FontChoice.readable,
+              onTap: () => a11y.setFontChoice(FontChoice.readable),
+            ),
+            const SizedBox(width: 6),
+            _FontButton(
+              label: 'OpenDyslexic',
+              description: 'Dyslexia-friendly',
+              selected: a11y.fontChoice == FontChoice.openDyslexic,
+              onTap: () => a11y.setFontChoice(FontChoice.openDyslexic),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _FontButton extends StatelessWidget {
+  final String label;
+  final String description;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FontButton({
+    required this.label,
+    required this.description,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Semantics(
+        label: 'Font: $label — $description',
+        selected: selected,
+        button: true,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(2),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            decoration: BoxDecoration(
+              color: selected
+                  ? AppColors.accent.withValues(alpha: 0.22)
+                  : AppColors.surfaceVariant,
+              border: Border.all(
+                color: selected ? AppColors.accent : AppColors.border,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: selected
+                        ? AppColors.focusColor
+                        : AppColors.textSecondary,
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  description,
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 9),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ),

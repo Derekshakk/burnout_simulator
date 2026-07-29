@@ -55,6 +55,8 @@ void dispose() {
 
 **Character names in shared UI are dynamic.** All shared UI and scenario text must reference the active character dynamically. Never hard-code Alex, Jordan, or another character name outside character-specific data files.
 
+**Character subtitle format.** The `context` field of `CharacterProfile` must follow the format `'[age] · High school student'` — do not use year labels like freshman, sophomore, junior, or senior. This ensures consistent card presentation across all characters. Only deviate if a future character is genuinely outside high school (e.g., college, middle school).
+
 ## Educational language rules
 
 Use supportive, nonjudgmental wording in all user-facing text. Avoid "good choice" / "bad choice". Prefer: "This choice reduced immediate demands." Frame rest as necessary, not as failure. State that experiences vary. See existing `educationalFeedback` strings in `demo_scenarios.dart` for reference tone.

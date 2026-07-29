@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Which font family the user has selected for the whole app.
+enum FontChoice {
+  /// Use the app's default system font stack.
+  system,
+
+  /// Verdana — a clear, widely-spaced sans-serif for readability.
+  readable,
+
+  /// OpenDyslexic — a typeface designed to reduce letter confusion for
+  /// readers with dyslexia.
+  openDyslexic,
+}
+
 class AccessibilityState extends ChangeNotifier {
   static const _kFontSize = 'a11y_fontSizeScale';
   static const _kLineHeight = 'a11y_lineHeightScale';
   static const _kLetterSpacing = 'a11y_letterSpacingDelta';
   static const _kContentScale = 'a11y_contentScale';
-  static const _kReadableFont = 'a11y_readableFont';
+  static const _kFontChoice = 'a11y_fontChoice';
   static const _kHighContrast = 'a11y_highContrast';
   static const _kTextAlign = 'a11y_textAlign';
   static const _kHighlightLinks = 'a11y_highlightLinks';
@@ -21,7 +34,7 @@ class AccessibilityState extends ChangeNotifier {
   double lineHeightScale = 1.0;
   double letterSpacingDelta = 0.0;
   double contentScale = 1.0;
-  bool readableFont = false;
+  FontChoice fontChoice = FontChoice.system;
   bool highContrast = false;
   TextAlign textAlign = TextAlign.start;
   bool highlightLinks = false;
@@ -34,12 +47,18 @@ class AccessibilityState extends ChangeNotifier {
 
   SharedPreferences? _prefs;
 
+  /// Convenience getter — true when Verdana is the active font.
+  bool get readableFont => fontChoice == FontChoice.readable;
+
+  /// Convenience getter — true when OpenDyslexic is the active font.
+  bool get openDyslexicFont => fontChoice == FontChoice.openDyslexic;
+
   bool get hasAnyChange =>
       fontSizeScale != 1.0 ||
       lineHeightScale != 1.0 ||
       letterSpacingDelta != 0.0 ||
       contentScale != 1.0 ||
-      readableFont ||
+      fontChoice != FontChoice.system ||
       highContrast ||
       textAlign != TextAlign.start ||
       highlightLinks ||
@@ -55,7 +74,15 @@ class AccessibilityState extends ChangeNotifier {
     lineHeightScale = _prefs!.getDouble(_kLineHeight) ?? 1.0;
     letterSpacingDelta = _prefs!.getDouble(_kLetterSpacing) ?? 0.0;
     contentScale = _prefs!.getDouble(_kContentScale) ?? 1.0;
-    readableFont = _prefs!.getBool(_kReadableFont) ?? false;
+    // Migrate from the old bool key if the new int key is absent.
+    final fontChoiceIdx = _prefs!.getInt(_kFontChoice);
+    if (fontChoiceIdx != null) {
+      fontChoice = FontChoice
+          .values[fontChoiceIdx.clamp(0, FontChoice.values.length - 1)];
+    } else {
+      final oldReadable = _prefs!.getBool('a11y_readableFont') ?? false;
+      fontChoice = oldReadable ? FontChoice.readable : FontChoice.system;
+    }
     highContrast = _prefs!.getBool(_kHighContrast) ?? false;
     final alignIdx = _prefs!.getInt(_kTextAlign) ?? 0;
     textAlign =
@@ -77,7 +104,7 @@ class AccessibilityState extends ChangeNotifier {
     p.setDouble(_kLineHeight, lineHeightScale);
     p.setDouble(_kLetterSpacing, letterSpacingDelta);
     p.setDouble(_kContentScale, contentScale);
-    p.setBool(_kReadableFont, readableFont);
+    p.setInt(_kFontChoice, fontChoice.index);
     p.setBool(_kHighContrast, highContrast);
     p.setInt(_kTextAlign, textAlign.index);
     p.setBool(_kHighlightLinks, highlightLinks);
@@ -113,8 +140,17 @@ class AccessibilityState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setFontChoice(FontChoice choice) {
+    fontChoice = choice;
+    _save();
+    notifyListeners();
+  }
+
+  /// Kept for call-sites that only care about toggling Verdana on/off.
   void toggleReadableFont() {
-    readableFont = !readableFont;
+    fontChoice = fontChoice == FontChoice.readable
+        ? FontChoice.system
+        : FontChoice.readable;
     _save();
     notifyListeners();
   }
@@ -178,7 +214,7 @@ class AccessibilityState extends ChangeNotifier {
     lineHeightScale = 1.0;
     letterSpacingDelta = 0.0;
     contentScale = 1.0;
-    readableFont = false;
+    fontChoice = FontChoice.system;
     highContrast = false;
     textAlign = TextAlign.start;
     highlightLinks = false;
