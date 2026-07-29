@@ -15,6 +15,7 @@ Confirm with the user (or infer from $ARGUMENTS):
 - **Name** — fictional first name only
 - **Age** — a plausible school-age integer
 - **Context** — use the exact format `"High school student"` for high school characters. Do **not** use year labels (freshman, sophomore, junior, senior). Only use a different value if the character is genuinely outside high school (e.g., "Middle school student", "College student").
+- **Gender and pronouns** — provide both values for the shared `CharacterProfile` identity fields. These are displayed dynamically on the character-selection card, so use the character's stated identity and do not rely on accent color alone.
 - **Short description** — 1–2 sentences on their specific profile (attention regulation, sensory sensitivities, executive function patterns, etc.)
 - **Strengths** — 3–5 items, positive framing
 - **Supportive strategies** — 3–5 strategies that work for this character specifically
@@ -39,6 +40,8 @@ Export a `const` instance named after the character:
 ```dart
 const <name>Character = CharacterProfile(
   name: '...',
+  gender: '...',
+  pronouns: '...',
   // all fields
 );
 ```

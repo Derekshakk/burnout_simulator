@@ -4,6 +4,7 @@ import '../app/routes.dart';
 import '../app/theme.dart';
 import '../models/game_state.dart';
 import '../widgets/site_navigation.dart';
+import '../widgets/project_ignite_logo.dart';
 
 class HomeScreen extends StatefulWidget {
   final GameState gameState;
@@ -147,7 +148,7 @@ class _HeroSection extends StatelessWidget {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HeroText(onPlay: onPlay),
+                  _HeroText(onPlay: onPlay, isMobile: isMobile),
                   const SizedBox(height: 40),
                   A11yImage(
                     semanticLabel:
@@ -159,7 +160,10 @@ class _HeroSection extends StatelessWidget {
             : Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(flex: 5, child: _HeroText(onPlay: onPlay)),
+                  Expanded(
+                    flex: 5,
+                    child: _HeroText(onPlay: onPlay, isMobile: isMobile),
+                  ),
                   const SizedBox(width: 60),
                   Expanded(
                     flex: 4,
@@ -178,8 +182,9 @@ class _HeroSection extends StatelessWidget {
 
 class _HeroText extends StatelessWidget {
   final VoidCallback onPlay;
+  final bool isMobile;
 
-  const _HeroText({required this.onPlay});
+  const _HeroText({required this.onPlay, required this.isMobile});
 
   @override
   Widget build(BuildContext context) {
@@ -200,16 +205,7 @@ class _HeroText extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        A11yHeading(
-          'Project\nIgnite',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 42,
-            fontWeight: FontWeight.w800,
-            height: 1.1,
-            letterSpacing: -0.5,
-          ),
-        ),
+        ProjectIgniteLogo(height: isMobile ? 112 : 156),
         const SizedBox(height: 16),
         ReadingText(
           'Work with your mind, protect your energy,\nand make it through the day.',

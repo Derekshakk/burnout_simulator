@@ -6,6 +6,8 @@ import '../data/alex_scenarios.dart';
 import '../data/demo_character.dart';
 import '../data/jordan_character.dart';
 import '../data/jordan_scenarios.dart';
+import '../data/maya_character.dart';
+import '../data/maya_scenarios.dart';
 import '../models/character_profile.dart';
 import '../models/game_scenario.dart';
 import '../models/game_state.dart';
@@ -47,52 +49,11 @@ class CharacterSelectScreen extends StatelessWidget {
                   children: [
                     _SelectHeader(),
                     const SizedBox(height: 32),
-                    isMobile
-                        ? Column(
-                            children: [
-                              _CharacterCard(
-                                character: demoCharacter,
-                                scenarios: alexScenarios,
-                                accentColor: AppColors.accent,
-                                onSelect: (c, s) =>
-                                    _selectCharacter(context, c, s),
-                              ),
-                              const SizedBox(height: 20),
-                              _CharacterCard(
-                                character: jordanCharacter,
-                                scenarios: jordanScenarios,
-                                accentColor: AppColors.accentPurple,
-                                onSelect: (c, s) =>
-                                    _selectCharacter(context, c, s),
-                              ),
-                            ],
-                          )
-                        : IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(
-                                  child: _CharacterCard(
-                                    character: demoCharacter,
-                                    scenarios: alexScenarios,
-                                    accentColor: AppColors.accent,
-                                    onSelect: (c, s) =>
-                                        _selectCharacter(context, c, s),
-                                  ),
-                                ),
-                                const SizedBox(width: 20),
-                                Expanded(
-                                  child: _CharacterCard(
-                                    character: jordanCharacter,
-                                    scenarios: jordanScenarios,
-                                    accentColor: AppColors.accentPurple,
-                                    onSelect: (c, s) =>
-                                        _selectCharacter(context, c, s),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                    _CharacterGrid(
+                      isMobile: isMobile,
+                      onSelect: (character, scenarios) =>
+                          _selectCharacter(context, character, scenarios),
+                    ),
                     const SizedBox(height: 32),
                     _Disclaimer(),
                   ],
@@ -102,6 +63,62 @@ class CharacterSelectScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CharacterGrid extends StatelessWidget {
+  final bool isMobile;
+  final void Function(CharacterProfile, List<GameScenario>) onSelect;
+
+  const _CharacterGrid({required this.isMobile, required this.onSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    final cards = [
+      _CharacterCard(
+        character: demoCharacter,
+        scenarios: alexScenarios,
+        accentColor: AppColors.accent,
+        onSelect: onSelect,
+      ),
+      _CharacterCard(
+        character: jordanCharacter,
+        scenarios: jordanScenarios,
+        accentColor: AppColors.accentPurple,
+        onSelect: onSelect,
+      ),
+      _CharacterCard(
+        character: mayaCharacter,
+        scenarios: mayaScenarios,
+        accentColor: AppColors.accentAmber,
+        onSelect: onSelect,
+      ),
+    ];
+
+    if (isMobile) {
+      return Column(
+        children: [
+          cards[0],
+          const SizedBox(height: 20),
+          cards[1],
+          const SizedBox(height: 20),
+          cards[2],
+        ],
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth - 20) / 2;
+        return Wrap(
+          spacing: 20,
+          runSpacing: 20,
+          children: cards
+              .map((card) => SizedBox(width: cardWidth, child: card))
+              .toList(),
+        );
+      },
     );
   }
 }
@@ -222,6 +239,21 @@ class _CharacterCardState extends State<_CharacterCard> {
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Semantics(
+                          label: 'Gender: ${c.gender}. Pronouns: ${c.pronouns}',
+                          child: ExcludeSemantics(
+                            child: Text(
+                              '${c.gender.toUpperCase()} · ${c.pronouns.toUpperCase()}',
+                              style: TextStyle(
+                                color: accent,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.7,
+                              ),
+                            ),
                           ),
                         ),
                       ],

@@ -3,6 +3,8 @@ class CharacterProfile {
   final String name;
   final int age;
   final String context;
+  final String gender;
+  final String pronouns;
   final String shortDescription;
   final String neurodivergenceType;
   final List<String> strengths;
@@ -24,6 +26,8 @@ class CharacterProfile {
     required this.name,
     required this.age,
     required this.context,
+    required this.gender,
+    required this.pronouns,
     required this.shortDescription,
     required this.neurodivergenceType,
     required this.strengths,

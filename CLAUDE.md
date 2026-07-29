@@ -57,6 +57,8 @@ void dispose() {
 
 **Character subtitle format.** The `context` field of `CharacterProfile` must follow the format `'[age] · High school student'` — do not use year labels like freshman, sophomore, junior, or senior. This ensures consistent card presentation across all characters. Only deviate if a future character is genuinely outside high school (e.g., college, middle school).
 
+**Character identity fields.** Every `CharacterProfile` must include a visible `gender` and `pronouns` value. The character-selection card renders these dynamically, so do not hard-code identity labels or character names in shared UI.
+
 ## Educational language rules
 
 Use supportive, nonjudgmental wording in all user-facing text. Avoid "good choice" / "bad choice". Prefer: "This choice reduced immediate demands." Frame rest as necessary, not as failure. State that experiences vary. See existing `educationalFeedback` strings in `demo_scenarios.dart` for reference tone.

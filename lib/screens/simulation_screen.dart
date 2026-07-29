@@ -7,6 +7,7 @@ import '../models/game_state.dart';
 import '../widgets/choice_button.dart';
 import '../widgets/educational_feedback_card.dart';
 import '../widgets/pixel_panel.dart';
+import '../widgets/project_ignite_logo.dart';
 import '../widgets/scenario_card.dart';
 import '../widgets/status_meter.dart';
 
@@ -115,15 +116,7 @@ class _SimNavBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              'PROJECT IGNITE',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
-            ),
+            const ProjectIgniteLogo(height: 32),
             const Spacer(),
             ListenableBuilder(
               listenable: gameState,

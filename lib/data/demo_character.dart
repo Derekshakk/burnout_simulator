@@ -5,6 +5,8 @@ const demoCharacter = CharacterProfile(
   name: 'Alex',
   age: 16,
   context: 'High school student',
+  gender: 'Male',
+  pronouns: 'he/him',
   shortDescription:
       'Alex experiences attention regulation difficulties, executive-function demands, overcommitment, and periods of intense focus followed by exhaustion.',
   neurodivergenceType: 'ADHD',

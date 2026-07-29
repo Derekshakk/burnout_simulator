@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../accessibility/accessibility_scope.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
+import 'project_ignite_logo.dart';
 
 class SiteNavigation extends StatefulWidget {
   final String activeSection;
@@ -67,7 +68,7 @@ class _SiteNavigationState extends State<SiteNavigation> {
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32),
             child: Row(
               children: [
-                _LogoWidget(),
+                _LogoWidget(isMobile: isMobile),
                 const Spacer(),
                 if (!isMobile) ...[
                   _NavLink(
@@ -132,30 +133,13 @@ class _SiteNavigationState extends State<SiteNavigation> {
 }
 
 class _LogoWidget extends StatelessWidget {
+  final bool isMobile;
+
+  const _LogoWidget({this.isMobile = false});
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 28,
-          height: 28,
-          color: AppColors.accent,
-          alignment: Alignment.center,
-          child: Icon(Icons.psychology, color: AppColors.background, size: 16),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          'PROJECT IGNITE',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ],
-    );
+    return ProjectIgniteLogo(height: isMobile ? 34 : 42);
   }
 }
 

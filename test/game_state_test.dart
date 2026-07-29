@@ -2,6 +2,8 @@ import 'package:burnout_simulator/data/alex_scenarios.dart';
 import 'package:burnout_simulator/data/demo_character.dart';
 import 'package:burnout_simulator/data/jordan_character.dart';
 import 'package:burnout_simulator/data/jordan_scenarios.dart';
+import 'package:burnout_simulator/data/maya_character.dart';
+import 'package:burnout_simulator/data/maya_scenarios.dart';
 import 'package:burnout_simulator/models/character_profile.dart';
 import 'package:burnout_simulator/models/game_scenario.dart';
 import 'package:burnout_simulator/models/game_state.dart';
@@ -15,7 +17,14 @@ void main() {
     );
   });
 
-  test('every Alex and Jordan route ends at 3:00 PM', () {
+  test('every character provides gender and pronouns for selection cards', () {
+    for (final character in [demoCharacter, jordanCharacter, mayaCharacter]) {
+      expect(character.gender, isNotEmpty);
+      expect(character.pronouns, isNotEmpty);
+    }
+  });
+
+  test('every character route ends at 3:00 PM', () {
     _expectEveryRouteEndsAtThree(
       character: demoCharacter,
       scenarios: alexScenarios,
@@ -23,6 +32,10 @@ void main() {
     _expectEveryRouteEndsAtThree(
       character: jordanCharacter,
       scenarios: jordanScenarios,
+    );
+    _expectEveryRouteEndsAtThree(
+      character: mayaCharacter,
+      scenarios: mayaScenarios,
     );
   });
 }

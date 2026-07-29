@@ -58,6 +58,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - assets/images/project_ignite_logo.png
+
   # Bundled readable font (Verdana) for the "Readable Font" accessibility
   # setting. Bundling ensures it renders on the web CanvasKit renderer, which
   # only uses fonts declared here.
