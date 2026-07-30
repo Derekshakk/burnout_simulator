@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../app/theme.dart';
 import 'accessibility_state.dart' show AccessibilityState, FontChoice;
 import 'tts_controller.dart';
@@ -44,7 +45,7 @@ class AccessibilityPanel extends StatelessWidget {
           color: AppColors.surface,
           borderRadius: const BorderRadius.all(Radius.circular(6)),
           elevation: 16,
-          shadowColor: Colors.black54,
+          shadowColor: AppColors.overlayScrim.withValues(alpha: 0.54),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(6)),
@@ -62,7 +63,7 @@ class AccessibilityPanel extends StatelessWidget {
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 8,
+                      vertical: 2,
                     ),
                     child: twoCol
                         ? _TwoColumnContent(
@@ -95,21 +96,23 @@ class _PanelHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
         borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
       ),
       child: Row(
         children: [
-          Icon(Icons.accessibility_new, color: AppColors.accent, size: 18),
+          Icon(Icons.accessibility_new, color: AppColors.accentText, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Accessibility Preferences',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: AppColors.textPrimary,
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -329,8 +332,8 @@ class _SectionLabel extends StatelessWidget {
       child: Text(
         text.toUpperCase(),
         style: TextStyle(
-          color: AppColors.accent,
-          fontSize: 10,
+          color: AppColors.accentText,
+          fontSize: 13,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
         ),
@@ -366,7 +369,7 @@ class _StepControl extends StatelessWidget {
     final canIncrement = value < max - 0.001;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.zero,
       child: Row(
         children: [
           Expanded(
@@ -392,7 +395,7 @@ class _StepControl extends StatelessWidget {
                 displayValue,
                 style: TextStyle(
                   color: AppColors.focusColor,
-                  fontSize: 12,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   fontFeatures: [FontFeature.tabularFigures()],
                 ),
@@ -428,7 +431,7 @@ class _StepButton extends StatelessWidget {
       button: true,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: AppTheme.compactButtonRadius,
         child: Container(
           width: 28,
           height: 28,
@@ -443,7 +446,7 @@ class _StepButton extends StatelessWidget {
                   : AppColors.surfaceVariant,
               width: 1,
             ),
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: AppTheme.compactButtonRadius,
           ),
           child: Icon(
             icon,
@@ -475,43 +478,65 @@ class _ToggleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       toggled: value,
+      button: true,
       label: '$label: $description',
-      child: InkWell(
-        onTap: onToggle,
-        borderRadius: BorderRadius.circular(2),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      label,
-                      style: TextStyle(
-                        color: value
-                            ? AppColors.focusColor
-                            : AppColors.textPrimary,
-                        fontSize: 13,
-                        fontWeight: value ? FontWeight.w600 : FontWeight.w400,
-                      ),
+      child: FocusableActionDetector(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+        },
+        actions: <Type, Action<Intent>>{
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              onToggle();
+              return null;
+            },
+          ),
+        },
+        child: Builder(
+          builder: (focusContext) => GestureDetector(
+            onTap: () {
+              Focus.of(focusContext).requestFocus();
+              onToggle();
+            },
+            behavior: HitTestBehavior.translucent,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: value
+                                ? AppColors.focusColor
+                                : AppColors.textPrimary,
+                            fontSize: 14,
+                            fontWeight: value
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                        Text(
+                          description,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 13,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 8),
+                  _Switch(value: value),
+                ],
               ),
-              const SizedBox(width: 8),
-              _Switch(value: value),
-            ],
+            ),
           ),
         ),
       ),
@@ -571,7 +596,7 @@ class _FontChoiceGroup extends StatelessWidget {
       children: [
         Text(
           'Font',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
         ),
         const SizedBox(height: 4),
         Row(
@@ -625,18 +650,18 @@ class _FontButton extends StatelessWidget {
         button: true,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: AppTheme.compactButtonRadius,
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
             decoration: BoxDecoration(
               color: selected
                   ? AppColors.accent.withValues(alpha: 0.22)
                   : AppColors.surfaceVariant,
               border: Border.all(
-                color: selected ? AppColors.accent : AppColors.border,
+                color: selected ? AppColors.focusRing : AppColors.border,
                 width: 1,
               ),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: AppTheme.compactButtonRadius,
             ),
             child: Column(
               children: [
@@ -646,7 +671,7 @@ class _FontButton extends StatelessWidget {
                     color: selected
                         ? AppColors.focusColor
                         : AppColors.textSecondary,
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   ),
                   textAlign: TextAlign.center,
@@ -654,7 +679,7 @@ class _FontButton extends StatelessWidget {
                 ),
                 Text(
                   description,
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 9),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -725,7 +750,7 @@ class _AlignButton extends StatelessWidget {
         button: true,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: AppTheme.compactButtonRadius,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 6),
             decoration: BoxDecoration(
@@ -733,10 +758,10 @@ class _AlignButton extends StatelessWidget {
                   ? AppColors.accent.withValues(alpha: 0.22)
                   : AppColors.surfaceVariant,
               border: Border.all(
-                color: selected ? AppColors.accent : AppColors.border,
+                color: selected ? AppColors.focusRing : AppColors.border,
                 width: 1,
               ),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: AppTheme.compactButtonRadius,
             ),
             child: Column(
               children: [
@@ -754,7 +779,7 @@ class _AlignButton extends StatelessWidget {
                     color: selected
                         ? AppColors.focusColor
                         : AppColors.textSecondary,
-                    fontSize: 10,
+                    fontSize: 13,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
@@ -811,7 +836,7 @@ class _ReadAloudSection extends StatelessWidget {
                     'Not available in this browser',
                     style: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 11,
+                      fontSize: 13,
                     ),
                   ),
               ],
@@ -820,7 +845,7 @@ class _ReadAloudSection extends StatelessWidget {
             // Speed selector
             Text(
               'Speed',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
             const SizedBox(height: 4),
             Wrap(
@@ -848,7 +873,7 @@ class _ReadAloudSection extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: null,
                   backgroundColor: AppColors.surfaceVariant,
-                  color: AppColors.accent,
+                  color: AppColors.accentText,
                   minHeight: 2,
                 ),
               ),
@@ -877,22 +902,22 @@ class _TtsButton extends StatelessWidget {
       label: label,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: AppTheme.compactButtonRadius,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: AppColors.surfaceVariant,
             border: Border.all(color: AppColors.border, width: 1),
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: AppTheme.compactButtonRadius,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 14, color: AppColors.accent),
+              Icon(icon, size: 14, color: AppColors.accentText),
               const SizedBox(width: 4),
               Text(
                 label,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 12),
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
               ),
             ],
           ),
@@ -921,7 +946,7 @@ class _SpeedButton extends StatelessWidget {
       label: 'Speed $label',
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: AppTheme.compactButtonRadius,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
@@ -929,16 +954,16 @@ class _SpeedButton extends StatelessWidget {
                 ? AppColors.accent.withValues(alpha: 0.22)
                 : AppColors.surfaceVariant,
             border: Border.all(
-              color: selected ? AppColors.accent : AppColors.border,
+              color: selected ? AppColors.focusRing : AppColors.border,
               width: 1,
             ),
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: AppTheme.compactButtonRadius,
           ),
           child: Text(
             label,
             style: TextStyle(
               color: selected ? AppColors.focusColor : AppColors.textSecondary,
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
@@ -961,8 +986,10 @@ class _ResetFooter extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: AppColors.border, width: 1)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        runSpacing: 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           ListenableBuilder(
             listenable: a11y,
@@ -971,7 +998,7 @@ class _ResetFooter extends StatelessWidget {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: AppColors.accent,
+                      color: AppColors.accentText,
                       shape: BoxShape.circle,
                     ),
                   )
@@ -986,7 +1013,7 @@ class _ResetFooter extends StatelessWidget {
             label: const Text('Reset All Settings'),
             style: TextButton.styleFrom(
               foregroundColor: AppColors.textSecondary,
-              textStyle: const TextStyle(fontSize: 12),
+              textStyle: const TextStyle(fontSize: 14),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             ),
           ),

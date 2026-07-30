@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../app/theme.dart';
 import 'accessibility_state.dart';
 
 /// A full-screen overlay that dims the page above and below a horizontal
@@ -56,7 +57,7 @@ class _MaskPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xCC000000);
+    final paint = Paint()..color = AppColors.readingMask;
 
     final top = pointerY - bandHeight / 2;
     final bottom = pointerY + bandHeight / 2;

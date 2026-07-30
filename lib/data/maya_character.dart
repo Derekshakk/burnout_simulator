@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../models/character_profile.dart';
 
 const mayaCharacter = CharacterProfile(
@@ -44,4 +46,11 @@ const mayaCharacter = CharacterProfile(
   initialMotivation: 74,
   initialLifeSatisfaction: 68,
   initialSelfAdvocacy: 45,
+  portraitImagePath: 'assets/characters/maya.jpg',
+  appearance: CharacterAppearance(
+    skinTone: Color(0xFFFFC18F),
+    hairColor: Color(0xFF21170E),
+    topColor: Color(0xFF3E8C83),
+    bottomColor: Color(0xFF53697E),
+  ),
 );

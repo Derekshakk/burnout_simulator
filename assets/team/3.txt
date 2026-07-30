@@ -1,0 +1,3 @@
+Name: Team Member Three
+Role: Flutter Developer
+Bio: Built the simulation engine, scenario logic, and the web frontend. Implemented character-specific scenarios, shared scenarios, and the results analysis system.

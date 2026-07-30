@@ -1,5 +1,17 @@
 # Project Ignite
 
+## Team assets and contact form
+
+Team cards on the home page are data-driven from `assets/team/`. Add a
+consecutively numbered `N.txt` file for each member and an optional matching
+`N.jpg` photo; see [assets/team/README.md](assets/team/README.md) for the
+required text format. The card uses a person placeholder until a matching photo
+is supplied.
+
+The **Contact Us** form validates its fields, then opens the visitor's email
+app with a prefilled message addressed to `Dereksha2008@gmail.com`. It does not
+send or store any form data itself; visitors must press Send in their email app.
+
 An interactive website and game about autism and ADHD burnout.
 
 ## Getting Started

@@ -27,51 +27,70 @@ class ScenarioCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Zone 1: Situation ───────────────────────────────────────────────
+          Text(
+            'SITUATION',
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.4,
+            ),
+          ),
+          const SizedBox(height: 6),
           ReadingText(
             scenario.description,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 14,
-              height: 1.6,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              border: Border.all(color: AppColors.border, width: 1),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 3,
-                  height: 40,
-                  margin: const EdgeInsets.only(right: 12),
-                  color: AppColors.accent.withValues(alpha: 0.5),
-                ),
-                Expanded(
-                  child: ReadingText(
-                    scenario.narration,
-                    style: TextStyle(
-                      color: AppColors.accent,
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
+              fontSize: 16,
+              height: 1.65,
             ),
           ),
           const SizedBox(height: 14),
+          Divider(color: AppColors.border, height: 1),
+          const SizedBox(height: 12),
+          // ── Zone 2: Narration ───────────────────────────────────────────────
+          Text(
+            'THEIR THOUGHTS',
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.4,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border(
+                left: BorderSide(
+                  color: AppColors.accent.withValues(alpha: 0.6),
+                  width: 3,
+                ),
+              ),
+            ),
+            child: ReadingText(
+              scenario.narration,
+              style: TextStyle(
+                color: AppColors.accentText,
+                fontSize: 16,
+                fontStyle: FontStyle.italic,
+                height: 1.6,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Divider(color: AppColors.border, height: 1),
+          const SizedBox(height: 12),
+          // ── Zone 3: Decision prompt ─────────────────────────────────────────
           Text(
             'What should $characterName do?',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontSize: 12,
-              color: AppColors.textMuted,
-              letterSpacing: 1.2,
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

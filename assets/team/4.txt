@@ -1,0 +1,3 @@
+Name: Team Member Four
+Role: Educational Content
+Bio: Wrote scenario descriptions, choice feedback, and educational explanations. Ensured all content uses supportive, nonjudgmental language aligned with best practices.

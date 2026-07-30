@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
+import '../app/session_navigation.dart';
 import '../app/theme.dart';
+import '../data/character_registry.dart';
 import '../models/game_state.dart';
+import '../widgets/character_portrait.dart';
 import '../widgets/pixel_panel.dart';
 import '../widgets/site_navigation.dart';
+import '../widgets/section_label.dart';
 
 class GameOverviewScreen extends StatelessWidget {
   final GameState gameState;
@@ -12,8 +16,7 @@ class GameOverviewScreen extends StatelessWidget {
   const GameOverviewScreen({super.key, required this.gameState});
 
   void _startGame(BuildContext context) {
-    gameState.reset();
-    Navigator.pushNamed(context, AppRoutes.select);
+    SessionNavigation.startNewGame(context, gameState);
   }
 
   @override
@@ -25,7 +28,7 @@ class GameOverviewScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          SiteNavigation(activeSection: AppRoutes.about),
+          SiteNavigation(activeSection: AppRoutes.about, gameState: gameState),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -99,25 +102,13 @@ class _Header extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            color: AppColors.accent.withValues(alpha: 0.15),
-            child: Text(
-              'ABOUT THE GAME',
-              style: TextStyle(
-                color: AppColors.accent,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 2.0,
-              ),
-            ),
-          ),
+          const SectionLabel(text: 'ABOUT THE GAME'),
           const SizedBox(height: 16),
           A11yHeading(
             'Project Ignite',
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 36,
+              fontSize: 38,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -128,7 +119,7 @@ class _Header extends StatelessWidget {
               'A choice-based simulation about one neurodivergent student\'s day. Explore how demands, strengths, and recovery shape burnout — and what changes when you advocate for what you need.',
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 16,
+                fontSize: 17,
                 height: 1.6,
               ),
             ),
@@ -148,33 +139,44 @@ class _CharacterPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ReadingText(
-            'Choose from two fictional characters — each with a distinct neurodivergent profile, different strengths, and different recovery strategies. The same scenarios unfold differently depending on who you play as.',
+            'Choose a fictional character — each has a distinct neurodivergent profile, strengths, and recovery strategies. The scenarios unfold differently depending on who you play as.',
             style: TextStyle(
               color: AppColors.textSecondary,
-              fontSize: 13,
+              fontSize: 14,
               height: 1.6,
             ),
           ),
           const SizedBox(height: 16),
-          _CharacterSection(
-            label: 'ALEX · ADHD · AGE 16',
-            color: AppColors.accent,
-            items: const [
-              'Strengths: Creativity, quick idea generation, deep focus on preferred tasks',
-              'Triggers: Unstructured task lists, sensory noise, mismatched roles',
-              'Recovery: Movement breaks, music, creative projects',
-            ],
-          ),
-          const SizedBox(height: 12),
-          _CharacterSection(
-            label: 'JORDAN · AUTISM · AGE 17',
-            color: AppColors.accentPurple,
-            items: const [
-              'Strengths: Pattern recognition, systematic thinking, deep interests',
-              'Triggers: Unexpected schedule changes, sensory overload, ambiguous instructions',
-              'Recovery: Special interest time, quiet spaces, fidgets and sensory toys',
-            ],
-          ),
+          ...registeredCharacters.asMap().entries.expand((entry) {
+            final profile = entry.value.profile;
+            final colors = [
+              AppColors.accentText,
+              AppColors.accentPurple,
+              AppColors.accentAmber,
+            ];
+            return [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CharacterPortrait(character: profile, width: 48, height: 60),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _CharacterSection(
+                      label:
+                          '${profile.name.toUpperCase()} · ${profile.neurodivergenceType.toUpperCase()} · AGE ${profile.age}',
+                      color: colors[entry.key % colors.length],
+                      items: [
+                        'Strengths: ${profile.strengths.take(3).join(', ')}',
+                        'Triggers: ${profile.burnoutTriggers.take(3).join(', ')}',
+                        'Recovery: ${profile.recoveryStrategies.take(3).join(', ')}',
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ];
+          }),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(10),
@@ -186,7 +188,7 @@ class _CharacterPanel extends StatelessWidget {
               'These characters are fictional and created for educational purposes. They do not represent all people with ADHD, autism, or any neurodivergent experience. Neurodivergent experiences vary widely.',
               style: TextStyle(
                 color: AppColors.textMuted,
-                fontSize: 11,
+                fontSize: 13,
                 height: 1.5,
                 fontStyle: FontStyle.italic,
               ),
@@ -218,7 +220,7 @@ class _CharacterSection extends StatelessWidget {
           label,
           style: TextStyle(
             color: color,
-            fontSize: 10,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
           ),
@@ -241,7 +243,7 @@ class _CharacterSection extends StatelessWidget {
                     item,
                     style: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 13,
+                      fontSize: 14,
                       height: 1.5,
                     ),
                   ),
@@ -267,7 +269,7 @@ class _GameMechanicsPanel extends StatelessWidget {
             'You guide your chosen character through five scenarios during a single school day. Each choice affects their internal state — and some choices have ripple effects that change what\'s possible later.',
             style: TextStyle(
               color: AppColors.textSecondary,
-              fontSize: 14,
+              fontSize: 16,
               height: 1.6,
             ),
           ),
@@ -346,7 +348,7 @@ class _MechanicBlock extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: AppColors.textPrimary,
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -355,7 +357,7 @@ class _MechanicBlock extends StatelessWidget {
                   description,
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 13,
+                    fontSize: 14,
                     height: 1.5,
                   ),
                 ),
@@ -406,7 +408,7 @@ class _ScenarioList extends StatelessWidget {
           'SCENARIO OVERVIEW',
           style: TextStyle(
             color: AppColors.textMuted,
-            fontSize: 10,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.5,
           ),
@@ -459,8 +461,8 @@ class _ScenarioRow extends StatelessWidget {
             child: Text(
               '$number',
               style: TextStyle(
-                color: AppColors.accent,
-                fontSize: 11,
+                color: AppColors.accentText,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -469,13 +471,15 @@ class _ScenarioRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 2,
                   children: [
                     Text(
                       title,
                       style: TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -484,7 +488,7 @@ class _ScenarioRow extends StatelessWidget {
                       time,
                       style: TextStyle(
                         color: AppColors.textMuted,
-                        fontSize: 11,
+                        fontSize: 13,
                       ),
                     ),
                   ],
@@ -494,7 +498,7 @@ class _ScenarioRow extends StatelessWidget {
                   description,
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 12,
+                    fontSize: 14,
                     height: 1.4,
                   ),
                 ),
@@ -516,16 +520,20 @@ class _PlayCTA extends StatelessWidget {
   Widget build(BuildContext context) {
     return PixelPanel(
       borderColor: AppColors.accent.withValues(alpha: 0.4),
-      backgroundColor: const Color(0xFF0d1a2e),
+      backgroundColor: AppColors.surface,
       child: Column(
         children: [
-          Icon(Icons.play_circle_outline, color: AppColors.accent, size: 36),
+          Icon(
+            Icons.play_circle_outline,
+            color: AppColors.accentText,
+            size: 36,
+          ),
           const SizedBox(height: 12),
           Text(
             'Ready to play?',
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 16,
+              fontSize: 17,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -541,7 +549,7 @@ class _PlayCTA extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, 44),
             ),
-            child: const Text('Play the Prototype'),
+            child: const Text('Play the Game'),
           ),
         ],
       ),

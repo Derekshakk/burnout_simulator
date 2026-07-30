@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../models/character_profile.dart';
 
 const jordanCharacter = CharacterProfile(
@@ -46,4 +48,11 @@ const jordanCharacter = CharacterProfile(
   initialMotivation: 70,
   initialLifeSatisfaction: 65,
   initialSelfAdvocacy: 40,
+  portraitImagePath: 'assets/characters/jordan.jpg',
+  appearance: CharacterAppearance(
+    skinTone: Color(0xFFF3B27E),
+    hairColor: Color(0xFF3A241D),
+    topColor: Color(0xFFAA2F1F),
+    bottomColor: Color(0xFF61778C),
+  ),
 );

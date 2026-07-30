@@ -3,6 +3,8 @@ import 'character_profile.dart';
 import 'game_choice.dart';
 import 'game_scenario.dart';
 
+enum GameSessionStatus { unselected, playing, completed }
+
 class GameState extends ChangeNotifier {
   CharacterProfile? _selectedCharacter;
   List<GameScenario> _activeScenarios = const [];
@@ -18,6 +20,7 @@ class GameState extends ChangeNotifier {
   final List<String> _selectedChoiceHistory = [];
   final Set<String> _appliedTags = {};
   bool _isFinished = false;
+  GameSessionStatus _sessionStatus = GameSessionStatus.unselected;
   bool _reduceVisualEffects = false;
   int _currentScenarioIndex = 0;
   String? _pendingFeedback;
@@ -37,10 +40,29 @@ class GameState extends ChangeNotifier {
       List.unmodifiable(_selectedChoiceHistory);
   Set<String> get appliedTags => Set.unmodifiable(_appliedTags);
   bool get isFinished => _isFinished;
+  GameSessionStatus get sessionStatus => _sessionStatus;
+  bool get isPlaying => _sessionStatus == GameSessionStatus.playing;
+  bool get hasCompletedGame => _sessionStatus == GameSessionStatus.completed;
   bool get reduceVisualEffects => _reduceVisualEffects;
   int get currentScenarioIndex => _currentScenarioIndex;
   String? get pendingFeedback => _pendingFeedback;
   String? get lastChoiceLabel => _lastChoiceLabel;
+
+  /// Resolves lifecycle-protected routes without changing session state.
+  String routeFor(String requestedRoute) {
+    switch (requestedRoute) {
+      case '/play':
+        if (_selectedCharacter == null || _activeScenarios.isEmpty) {
+          return '/select';
+        }
+        return hasCompletedGame ? '/results' : '/play';
+      case '/results':
+        if (hasCompletedGame) return '/results';
+        return isPlaying ? '/play' : '/select';
+      default:
+        return requestedRoute;
+    }
+  }
 
   double get burnoutLevel {
     double burnout = 0;
@@ -86,7 +108,10 @@ class GameState extends ChangeNotifier {
 
   String? carryoverNote(GameScenario scenario) {
     if (scenario.carryoverNotes == null || _appliedTags.isEmpty) return null;
-    for (final tag in _appliedTags) {
+    // More than one earlier choice can be relevant. Keep the presentation to
+    // one note, but let the most recent matching choice take precedence so an
+    // older tag cannot hide the immediate carryover from the preceding scene.
+    for (final tag in _appliedTags.toList().reversed) {
       final note = scenario.carryoverNotes![tag];
       if (note != null) return note;
     }
@@ -97,13 +122,23 @@ class GameState extends ChangeNotifier {
     CharacterProfile character,
     List<GameScenario> scenarios,
   ) {
+    if (scenarios.isEmpty) {
+      throw ArgumentError.value(scenarios, 'scenarios', 'Must not be empty');
+    }
     _selectedCharacter = character;
-    _activeScenarios = scenarios;
+    _activeScenarios = List.unmodifiable(scenarios);
     _resetProgress();
+    _sessionStatus = GameSessionStatus.playing;
     notifyListeners();
   }
 
   void applyChoice(GameChoice choice) {
+    if (!isPlaying || _pendingFeedback != null) return;
+    final currentScenario = _activeScenarios[_currentScenarioIndex];
+    if (!currentScenario.choices.contains(choice) ||
+        !isChoiceAvailable(choice)) {
+      return;
+    }
     _energy = (_energy + choice.energyDelta).clamp(0, 100);
     _focus = (_focus + choice.focusDelta).clamp(0, 100);
     _stress = (_stress + choice.stressDelta).clamp(0, 100);
@@ -124,19 +159,21 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void advanceScenario(List<GameScenario> scenarios) {
+  void advanceScenario() {
+    if (!isPlaying || _pendingFeedback == null) return;
     _pendingFeedback = null;
     _lastChoiceLabel = null;
-    if (_currentScenarioIndex + 1 >= scenarios.length) {
+    if (_currentScenarioIndex + 1 >= _activeScenarios.length) {
       _isFinished = true;
-      final endTimeLabel = scenarios[_currentScenarioIndex].endTimeLabel;
+      _sessionStatus = GameSessionStatus.completed;
+      final endTimeLabel = _activeScenarios[_currentScenarioIndex].endTimeLabel;
       if (endTimeLabel != null) {
         _timeMinutes = _minutesFromTimeLabel(endTimeLabel);
       }
     } else {
       _currentScenarioIndex++;
       final nextScenarioTime = _minutesFromTimeLabel(
-        scenarios[_currentScenarioIndex].timeLabel,
+        _activeScenarios[_currentScenarioIndex].timeLabel,
       );
       // Choices affect the clock within a scenario.  Waiting until the next
       // scheduled block never moves the day backward, and fills the ordinary
@@ -155,7 +192,9 @@ class GameState extends ChangeNotifier {
 
   void _resetProgress() {
     final c = _selectedCharacter;
-    _timeMinutes = 480;
+    _timeMinutes = _activeScenarios.isEmpty
+        ? 480
+        : _minutesFromTimeLabel(_activeScenarios.first.timeLabel);
     _energy = c?.initialEnergy ?? 80;
     _focus = c?.initialFocus ?? 70;
     _stress = c?.initialStress ?? 20;
@@ -171,10 +210,20 @@ class GameState extends ChangeNotifier {
     _lastChoiceLabel = null;
   }
 
-  void reset() {
+  /// Starts a blank session. Accessibility-related visual preferences remain.
+  void beginNewSession() {
+    _selectedCharacter = null;
+    _activeScenarios = const [];
+    _sessionStatus = GameSessionStatus.unselected;
     _resetProgress();
     notifyListeners();
   }
+
+  /// Ends the current playthrough and removes all character-specific data.
+  void endSession() => beginNewSession();
+
+  /// Backward-compatible reset with safe new-session semantics.
+  void reset() => beginNewSession();
 
   int _minutesFromTimeLabel(String label) {
     final match = RegExp(r'^(\d{1,2}):(\d{2}) (AM|PM)$').firstMatch(label);

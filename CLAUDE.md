@@ -66,3 +66,37 @@ Use supportive, nonjudgmental wording in all user-facing text. Avoid "good choic
 ## Theme
 
 Dark theme only (`lib/app/theme.dart`). Color constants are in `AppColors`. Do not use raw `Color(0x...)` literals in new widgets — use `AppColors.*` names.
+
+## Team Assets
+
+Team member data lives in `assets/team/`. Each team member is represented by a pair of files with the same number:
+
+- `assets/team/N.jpg` — photo (optional; a placeholder icon shows if the file is missing)
+- `assets/team/N.txt` — structured text in this exact format:
+
+```
+Name: Full Name Here
+Role: Role / Title Here
+Bio: One or two sentences describing this person's contribution to Project Ignite.
+```
+
+Files must be numbered consecutively starting from 1 (1.txt, 2.txt, 3.txt …). The loader stops at the first missing number.
+
+**To add a new team member:** add `N.jpg` and `N.txt` where N is the next available number. Run `flutter build web` to rebundle assets.
+
+**To remove a team member:** remove that number's files and renumber any higher-numbered files to close the gap.
+
+The team section is live at `/` (homepage) and renders dynamically — no code changes are needed when photos or bios change.
+
+## Contact Form
+
+The contact form (homepage → Contact Us section) opens the user's default email app with a prefilled message addressed to **Dereksha2008@gmail.com**.
+
+- Subject: `Project Ignite – Contact Form Submission`
+- Body includes: sender name, reply-to email, role/reason, and message
+- **Important:** The form does NOT submit automatically. The user must press Send inside their email app. The UI makes this clear.
+- No personal data is stored in Firebase or any database.
+
+**To replace the email fallback with a real backend later:** replace the `_submit()` method in `_ContactSectionState` with an HTTP POST to your endpoint. Keep the same form validation and success/error state logic.
+
+**Spam considerations:** The current mailto approach requires human action, which naturally filters spam. A real backend should add CAPTCHA, honeypot fields, or rate limiting.

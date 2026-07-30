@@ -2,11 +2,14 @@ import '../models/game_scenario.dart';
 import '../models/game_choice.dart';
 
 const List<GameScenario> alexScenarios = [
+  // S1 — Morning Planning (unchanged)
   GameScenario(
     id: 'morning_planning',
     title: 'Morning Planning',
     timeLabel: '8:00 AM',
     sceneTone: 'morning',
+    sceneImagePath: 'assets/stories/alex_productive.jpg',
+    sceneSemanticLabel: 'Illustration of Alex planning their day at a desk',
     description:
         'Alex sits at the kitchen table and opens a notebook to find a long list of assignments, a group project due this week, and two after-school commitments. The list stretches across two pages.',
     narration:
@@ -54,11 +57,15 @@ const List<GameScenario> alexScenarios = [
       ),
     ],
   ),
+
+  // S2 — Morning Hallways (unchanged)
   GameScenario(
     id: 'sensory_hallway',
     title: 'Morning Hallways',
     timeLabel: '9:30 AM',
-    sceneTone: 'class',
+    sceneTone: 'hallway',
+    sceneImagePath: 'assets/stories/hallway_background.jpg',
+    sceneSemanticLabel: 'Illustration of a busy school hallway between classes',
     carryoverNotes: {
       'chaotic_morning':
           'After a rushed and chaotic start to the morning, the hallway crowd hit harder than usual. Alex was already running low before the noise arrived.',
@@ -109,192 +116,163 @@ const List<GameScenario> alexScenarios = [
       ),
     ],
   ),
+
+  // S3 — Group Project Start (replaces class_project; integrates Restlessness + Looking Productive notes)
   GameScenario(
-    id: 'class_project',
-    title: 'Class Project',
-    timeLabel: '9:45 AM',
+    id: 'class_restlessness',
+    title: 'Group Project Start',
+    timeLabel: '10:00 AM',
     sceneTone: 'class',
+    sceneImagePath: 'assets/stories/jordan_classroom.jpg',
+    sceneSemanticLabel: 'Illustration of a classroom during a group project',
     carryoverNotes: {
+      'chaotic_morning':
+          'Alex arrived at this period already stretched thin. The group project waited while restlessness grew louder.',
       'pushed_sensory':
-          'Alex arrived still buzzing from the hallway noise. Classmates talking nearby felt louder than usual, making it harder to catch what the teacher was saying.',
+          'The sensory pressure from the hallway carried into the classroom. Sitting still felt harder than usual.',
     },
     description:
-        'In class, the teacher assigns group roles for a project. Alex is given a role requiring prolonged organization and repetitive documentation. Another student gets visual design and idea generation — a much better fit for Alex\'s strengths.',
+        'Thirty minutes into the period, the teacher has assigned a group project. Other students appear to have started. Alex hasn\'t — the task feels large, the first step unclear, and staying still is getting harder.',
     narration:
-        '"I can already see exactly how the design should look. But they want me to fill out tables of data instead."',
+        '"Everyone looks like they know exactly what to do. I\'ve been staring at the same blank page for twenty minutes."',
     choices: [
       GameChoice(
-        id: 'accept_silently',
-        label: 'Accept the assigned role without saying anything',
+        id: 'sit_still_pretend',
+        label: 'Force sitting still and appear to be working',
         description:
-            'Stay quiet and begin the documentation task even though it does not match Alex\'s strengths.',
-        energyDelta: -20,
-        focusDelta: -10,
-        stressDelta: 20,
-        motivationDelta: -15,
-        selfAdvocacyDelta: -10,
-        timeMinutesDelta: 60,
-        tag: 'stayed_silent',
+            'Hold the restlessness in and look busy, hoping the task somehow becomes clearer.',
+        energyDelta: -18,
+        stressDelta: 22,
+        focusDelta: -15,
+        motivationDelta: -10,
+        selfAdvocacyDelta: -5,
+        timeMinutesDelta: 55,
+        tag: 'masked_restless',
         educationalFeedback:
-            'Accepting a role that clashes with one\'s strengths without communication increased stress and reduced motivation. Prolonged engagement in mismatched tasks consumes more energy. This reflects a common experience for neurodivergent students who may find self-advocacy difficult or risky. The impact is not a personal failing.',
+            'Holding restlessness in while also avoiding a task requires two layers of effort simultaneously. Energy goes toward appearing still rather than engaging with the work. Over time, this pattern compounds: the task does not start, and the cost of masking keeps adding up.',
       ),
       GameChoice(
-        id: 'advocate_with_teacher',
-        label:
-            'Ask the teacher to contribute through visual design while completing some documentation',
+        id: 'fidget_and_break_task',
+        label: 'Fidget discreetly and break the assignment into smaller steps',
         description:
-            'Raise a hand and ask whether it is possible to help with design while also completing a smaller portion of the documentation.',
+            'Allow small physical movement — tapping, shifting — while writing out what the assignment actually requires, step by step.',
         energyDelta: -5,
         focusDelta: 15,
         stressDelta: -10,
-        motivationDelta: 20,
-        selfAdvocacyDelta: 25,
-        timeMinutesDelta: 70,
-        taskCompleted: 'Self-advocacy practiced in class',
-        tag: 'advocated_role',
-        educationalFeedback:
-            'Asking for a role that matched Alex\'s strengths is an example of self-advocacy. This increased engagement and motivation. Speaking up can feel effortful, and the outcome may not always go as hoped. Practicing self-advocacy is a skill that often becomes more accessible over time with support.',
-      ),
-      GameChoice(
-        id: 'refuse_participation',
-        label: 'Refuse to participate completely',
-        description:
-            'Decline the assignment entirely and sit out of the group work.',
-        energyDelta: 10,
-        stressDelta: 15,
-        motivationDelta: -20,
-        lifeSatisfactionDelta: -20,
-        timeMinutesDelta: 60,
-        educationalFeedback:
-            'Opting out preserved immediate energy. However, this left the demand unresolved and introduced new stress about consequences. Life satisfaction decreased because an opportunity for connection and accomplishment was missed. Sometimes stepping back is necessary and sometimes the reasons for refusing deserve closer attention from supportive adults.',
-      ),
-    ],
-  ),
-  GameScenario(
-    id: 'lunch_recovery',
-    title: 'Lunch Break',
-    timeLabel: '11:00 AM',
-    sceneTone: 'evening',
-    carryoverNotes: {
-      'pushed_sensory':
-          'The sensory pressure from this morning\'s crowded hallway hasn\'t fully lifted. The need for quiet feels urgent, not just preferable.',
-      'stayed_silent':
-          'Sitting with a mismatched role for a full period left Alex\'s motivation lower than usual. Something restorative — not just food — feels necessary.',
-    },
-    description:
-        'Alex has a free 30-minute lunch period. The cafeteria is loud and crowded. A quieter spot outside near the courtyard is open. Alex has eaten only a granola bar since this morning.',
-    narration:
-        '"I need something. I\'m not sure if it\'s food, quiet, movement, or all three."',
-    choices: [
-      GameChoice(
-        id: 'cafeteria_social',
-        label: 'Eat in the cafeteria with classmates',
-        description:
-            'Sit with the usual group. The noise is significant, but so is the social connection.',
-        energyDelta: -10,
-        stressDelta: 10,
-        motivationDelta: 5,
-        lifeSatisfactionDelta: 5,
-        focusDelta: -5,
-        timeMinutesDelta: 30,
-        educationalFeedback:
-            'Social connection can be restorative for some people and draining for others — and often both at once. The cafeteria provided lunch and a sense of belonging, but the high sensory environment countered some of the benefit. The net effect depends on where Alex\'s energy was before and what the rest of the afternoon holds.',
-      ),
-      GameChoice(
-        id: 'quiet_spot_outside',
-        label: 'Find a quiet spot outside with headphones and eat alone',
-        description:
-            'Take lunch outside to a less crowded area. Headphones, food, and 30 minutes of low stimulation.',
-        energyDelta: 15,
-        stressDelta: -20,
-        focusDelta: 10,
-        motivationDelta: 5,
-        timeMinutesDelta: 30,
-        tag: 'quiet_lunch',
-        educationalFeedback:
-            'Choosing a low-stimulation environment during lunch allowed Alex\'s nervous system to partially recover. Eating and resting quietly restored energy more effectively than staying in high demand. Not all recovery looks like sleep — this is how many people with sensory sensitivities recharge.',
-      ),
-      GameChoice(
-        id: 'stim_walk',
-        label: 'Take a stim walk around the building, then eat',
-        description:
-            'Walk the perimeter of the school at a comfortable pace before eating. Rhythmic movement can help discharge accumulated sensory tension.',
-        energyDelta: 10,
-        stressDelta: -15,
-        focusDelta: 5,
         motivationDelta: 10,
-        timeMinutesDelta: 30,
-        tag: 'stim_recovery',
+        timeMinutesDelta: 55,
+        taskCompleted: 'Group project started with task breakdown',
+        tag: 'task_started_fidget',
         educationalFeedback:
-            'Stimming — repetitive movement or self-soothing behaviors — is a natural self-regulation tool for many neurodivergent people. A rhythmic walk serves a similar function. Movement helps discharge accumulated stress and can improve focus for the next period. This is a valid strategy, not a habit to suppress.',
+            'Allowing natural, discreet movement can reduce restlessness enough to free attention for the task. Breaking the assignment into smaller steps addresses the initiation barrier directly — it answers the question "where do I start?" rather than expecting motivation to arrive before a plan exists.',
       ),
       GameChoice(
-        id: 'skip_lunch_work',
-        label: 'Skip eating and use the time to catch up on homework',
+        id: 'ask_classmate_help',
+        label: 'Ask a classmate how they got started',
         description:
-            'Use the lunch period for academic work instead of recovery.',
-        energyDelta: -20,
-        stressDelta: 15,
-        focusDelta: -10,
-        motivationDelta: -10,
-        timeMinutesDelta: 30,
-        maxBurnoutAllowed: 65,
-        unavailableReason:
-            'Alex\'s system is too depleted to focus on work without food or rest. When burnout is this high, skipping recovery time tends to compound the deficit rather than reduce it.',
+            'Lean over and ask a nearby student what they are working on first.',
+        energyDelta: -8,
+        stressDelta: -5,
+        focusDelta: 10,
+        motivationDelta: 15,
+        selfAdvocacyDelta: 15,
+        timeMinutesDelta: 55,
+        taskCompleted: 'Asked a peer for help getting started',
+        tag: 'peer_helped_start',
         educationalFeedback:
-            'Using recovery time for work output can feel productive but often produces diminishing returns. When energy and food are both low, cognitive performance degrades significantly. The tasks may take longer than they would after a proper break — and the cost of skipping rest carries forward into the afternoon.',
+            'Asking for help with task initiation is not the same as asking for answers. Many people with ADHD find starting the hardest part — an external prompt or a brief exchange with a peer can function as the activation cue the brain needs. This is a practical strategy, not a sign of inability.',
+      ),
+      GameChoice(
+        id: 'ask_teacher_movement',
+        label:
+            'Ask the teacher quietly whether standing or taking a brief movement break is possible',
+        description:
+            'Wait for a moment when the teacher is nearby and ask whether working while standing or stepping out briefly is an option during the period.',
+        energyDelta: -8,
+        stressDelta: -5,
+        focusDelta: 12,
+        selfAdvocacyDelta: 18,
+        motivationDelta: 5,
+        timeMinutesDelta: 55,
+        taskCompleted: 'Requested a movement accommodation from teacher',
+        tag: 'asked_movement_accommodation',
+        educationalFeedback:
+            'Asking for permission to stand or take a brief movement break is a functional accommodation request — it does not require naming ADHD or providing documentation. "I focus better with some movement" is an accurate and complete reason. Teachers who respond supportively signal that the classroom has room for different working styles. The cost of asking is real; the benefit, when it works, can change the whole period.',
       ),
     ],
   ),
+
+  // S4 — Lunch Break: moved to shared_scenarios.dart as buildLunchBreakScenario(alex).
+  //       Wired in character_registry.dart at slot 4.
+
+  // S5 — Final School Hour (revised: integrates Time Awareness note; adds reprioritize + timer choices)
   GameScenario(
     id: 'end_of_day',
     title: 'Final School Hour',
     timeLabel: '2:00 PM',
     endTimeLabel: '3:00 PM',
     sceneTone: 'evening',
+    sceneImagePath: 'assets/stories/time_Awareness.jpg',
+    sceneSemanticLabel:
+        'Illustration representing time awareness at the end of the school day',
     carryoverNotes: {
       'quiet_lunch':
-          'The midday break paid off. Alex arrived home with a little more left in reserve than the morning suggested.',
+          'The midday break paid off. Alex arrived at the final hour with a little more left in reserve than the morning suggested.',
       'stim_recovery':
-          'The stim walk at lunch helped regulate the accumulated stress. Alex can feel the difference — the evening feels slightly more possible.',
+          'The stim walk at lunch helped regulate the accumulated stress. Alex can feel the difference — the final hour feels slightly more possible.',
     },
     description:
-        'The final hour of the school day is beginning. Alex has limited time and energy, unfinished work to plan for, and a favorite creative digital project waiting at home. The body feels heavy.',
+        'The final hour of the school day is winding down. Looking back at the task list from this morning, one subject somehow absorbed the entire homework period. Several items are untouched. Energy is low, and the evening still holds more than it should.',
     narration:
-        '"I want to work on my project. But I\'m not sure I have anything left to give it."',
+        '"How is it already two o\'clock? I barely got through one thing. And there\'s still a whole list."',
     choices: [
       GameChoice(
-        id: 'work_until_done',
-        label: 'Continue working until everything is finished',
+        id: 'panic_rush_remaining',
+        label: 'Panic and try to rush through all remaining work',
         description:
-            'Push through and try to complete all remaining assignments before resting.',
+            'Attempt everything at once, moving fast to try to recover the lost time.',
         energyDelta: -30,
-        stressDelta: 20,
-        motivationDelta: -25,
+        stressDelta: 25,
+        motivationDelta: -20,
         lifeSatisfactionDelta: -10,
         timeMinutesDelta: 60,
-        taskCompleted: 'Additional assignments attempted',
+        taskCompleted: 'Remaining assignments rushed through',
         minEnergyRequired: 30,
         maxBurnoutAllowed: 70,
         unavailableReason:
-            'Alex doesn\'t have enough capacity to sustain this level of effort right now. When burnout is high and energy is low, pushing through extended work tends to compound the deficit rather than resolve it. This is not a choice — it\'s a capacity limit.',
+            'Alex doesn\'t have enough capacity to sustain this level of effort right now. Pushing through without capacity often compounds the deficit rather than resolving it. This is not a choice — it\'s a limit.',
         educationalFeedback:
-            'Continuing to work when energy is already low can deplete reserves needed for recovery. Completing tasks through exhaustion may make future demands harder to manage. Recognizing when to stop is itself a skill — not a failure. Rest is part of sustainable functioning, not a reward earned by finishing everything.',
+            'Rushing through multiple tasks in response to time pressure can produce low-quality output and significant additional stress. Time blindness — losing track of how long a task takes — is a common experience with ADHD, not a character flaw. Reacting with panic tends to add to the problem rather than resolve it.',
       ),
       GameChoice(
-        id: 'break_then_priority',
-        label: 'Take a short movement break, finish one priority, then stop',
+        id: 'reprioritize_calmly',
+        label:
+            'Stop, identify what actually matters today, and finish one task',
         description:
-            'Step away for ten minutes, complete the most important remaining task, and then let the evening be rest.',
+            'Take a few minutes to look at what is genuinely due and in what order, then complete only the highest-priority item.',
         energyDelta: 5,
         focusDelta: 10,
         stressDelta: -10,
         motivationDelta: 5,
         lifeSatisfactionDelta: 10,
         timeMinutesDelta: 60,
-        taskCompleted: 'Priority task completed with recovery break',
+        taskCompleted: 'Reprioritized and completed one key task',
         educationalFeedback:
-            'Short movement breaks can support attention regulation and reduce accumulated stress. Completing one priority task before stopping kept progress moving without depleting remaining energy. This balance supported a better chance of retaining access to a valued activity later in the evening.',
+            'Pausing to reprioritize after realizing time has passed is a regulation strategy, not giving up. Identifying what actually needs to happen today — versus what can wait — reduces the gap between demands and available capacity. One completed priority is more sustainable than several rushed, incomplete ones.',
+      ),
+      GameChoice(
+        id: 'set_timers_and_work',
+        label: 'Set a timer for each remaining task and work through them',
+        description:
+            'Divide the remaining time into timed chunks, assign one task to each, and use the timer as an external cue to stay on track.',
+        focusDelta: 15,
+        stressDelta: -5,
+        motivationDelta: 10,
+        timeMinutesDelta: 60,
+        taskCompleted: 'Used timers to structure remaining work',
+        tag: 'timer_strategy',
+        educationalFeedback:
+            'External timers provide structure that an internal sense of time may not reliably offer. For many people with ADHD, working in defined time chunks — sometimes called time-boxing — makes tasks feel more manageable and provides a clear signal for when to stop. This is an accommodation strategy, not a workaround.',
       ),
       GameChoice(
         id: 'stop_and_rest',

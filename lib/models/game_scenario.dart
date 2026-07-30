@@ -10,6 +10,8 @@ class GameScenario {
   final List<GameChoice> choices;
   final String sceneTone;
   final Map<String, String>? carryoverNotes;
+  final String? sceneImagePath;
+  final String? sceneSemanticLabel;
 
   const GameScenario({
     required this.id,
@@ -21,5 +23,7 @@ class GameScenario {
     required this.choices,
     this.sceneTone = 'neutral',
     this.carryoverNotes,
+    this.sceneImagePath,
+    this.sceneSemanticLabel,
   });
 }

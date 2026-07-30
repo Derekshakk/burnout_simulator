@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../app/theme.dart';
 import 'package:flutter/services.dart';
 import 'accessibility_panel.dart';
 import 'accessibility_scope.dart';
@@ -78,7 +79,7 @@ class _AccessibilityOverlayState extends State<AccessibilityOverlay> {
       context: navContext,
       barrierDismissible: true,
       barrierLabel: 'Dismiss accessibility preferences',
-      barrierColor: Colors.black.withValues(alpha: 0.25),
+      barrierColor: AppColors.overlayScrim.withValues(alpha: 0.25),
       transitionDuration: const Duration(milliseconds: 200),
       routeSettings: const RouteSettings(name: 'accessibility-panel'),
       pageBuilder: (dialogContext, _, _) {
@@ -278,20 +279,20 @@ class _FloatingA11yButtonState extends State<_FloatingA11yButton> {
             height: 48,
             decoration: BoxDecoration(
               color: widget.isOpen
-                  ? const Color(0xFF58A6FF)
-                  : const Color(0xFF21262D),
+                  ? AppColors.illustrationScreenGlow
+                  : AppColors.overlaySurface,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: _focused
-                    ? const Color(0xFF79C0FF)
+                    ? AppColors.focusRing
                     : widget.hasChanges
-                    ? const Color(0xFF58A6FF)
-                    : const Color(0xFF30363D),
+                    ? AppColors.illustrationScreenGlow
+                    : AppColors.overlayBorder,
                 width: _focused ? 3 : 1,
               ),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: Color(0x55000000),
+                  color: AppColors.overlayScrim.withValues(alpha: 0.33),
                   blurRadius: 8,
                   offset: Offset(0, 2),
                 ),
@@ -303,8 +304,8 @@ class _FloatingA11yButtonState extends State<_FloatingA11yButton> {
                 Icon(
                   widget.isOpen ? Icons.close : Icons.accessibility_new,
                   color: widget.isOpen
-                      ? const Color(0xFF0D1117)
-                      : const Color(0xFF58A6FF),
+                      ? AppColors.illustrationGround
+                      : AppColors.illustrationScreenGlow,
                   size: 22,
                 ),
                 if (widget.hasChanges && !widget.isOpen)
@@ -314,8 +315,8 @@ class _FloatingA11yButtonState extends State<_FloatingA11yButton> {
                     child: Container(
                       width: 8,
                       height: 8,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF58A6FF),
+                      decoration: BoxDecoration(
+                        color: AppColors.illustrationScreenGlow,
                         shape: BoxShape.circle,
                       ),
                     ),

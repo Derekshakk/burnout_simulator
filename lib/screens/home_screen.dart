@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
 import '../models/game_state.dart';
 import '../widgets/site_navigation.dart';
 import '../widgets/project_ignite_logo.dart';
+import '../widgets/section_label.dart';
 
 class HomeScreen extends StatefulWidget {
   final GameState gameState;
+  final String? initialSection;
 
-  const HomeScreen({super.key, required this.gameState});
+  const HomeScreen({super.key, required this.gameState, this.initialSection});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -17,8 +20,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey _burnoutKey = GlobalKey();
   final GlobalKey _resourcesKey = GlobalKey();
+  final GlobalKey _contactKey = GlobalKey();
   String _activeSection = AppRoutes.home;
   bool _ignoreScrollUpdates = false;
 
@@ -26,6 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_updateActiveFromScroll);
+    final section = widget.initialSection;
+    if (section != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _scrollTo(_keyForSection(section), section);
+      });
+    }
   }
 
   @override
@@ -48,14 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void _updateActiveFromScroll() {
     if (_ignoreScrollUpdates) return;
     const activationThreshold = 56.0 + 120.0;
-    final burnoutY = _getScreenY(_burnoutKey);
     final resourcesY = _getScreenY(_resourcesKey);
+    final contactY = _getScreenY(_contactKey);
 
     String next = AppRoutes.home;
     if (resourcesY != null && resourcesY <= activationThreshold) {
       next = 'resources';
-    } else if (burnoutY != null && burnoutY <= activationThreshold) {
-      next = 'burnout';
+    } else if (contactY != null && contactY <= activationThreshold) {
+      next = 'contact';
     }
 
     if (next != _activeSection) {
@@ -80,6 +89,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  GlobalKey _keyForSection(String section) {
+    switch (section) {
+      case 'resources':
+        return _resourcesKey;
+      case 'contact':
+        return _contactKey;
+      default:
+        return _resourcesKey;
+    }
+  }
+
   void _startGame() {
     widget.gameState.reset();
     Navigator.pushNamed(context, AppRoutes.select);
@@ -96,8 +116,9 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           SiteNavigation(
             activeSection: _activeSection,
-            onScrollToBurnout: () => _scrollTo(_burnoutKey, 'burnout'),
+            gameState: widget.gameState,
             onScrollToResources: () => _scrollTo(_resourcesKey, 'resources'),
+            onScrollToContact: () => _scrollTo(_contactKey, 'contact'),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -108,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   _HeroSection(isMobile: isMobile, onPlay: _startGame),
                   _AboutSection(isMobile: isMobile, onPlay: _startGame),
                   _FeaturesSection(isMobile: isMobile),
-                  _HowBurnoutWorksSection(key: _burnoutKey, isMobile: isMobile),
+                  _ExplorePreviewSection(isMobile: isMobile),
+                  _ContactSection(key: _contactKey, isMobile: isMobile),
                   _ResourcesSection(key: _resourcesKey, isMobile: isMobile),
                   _Footer(),
                 ],
@@ -132,49 +154,50 @@ class _HeroSection extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.background, AppColors.surface],
-        ),
+        // The peach page color remains visible if the image cannot be loaded.
+        color: AppColors.background,
         border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 20 : 80,
-          vertical: isMobile ? 40 : 64,
-        ),
-        child: isMobile
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _HeroText(onPlay: onPlay, isMobile: isMobile),
-                  const SizedBox(height: 40),
-                  A11yImage(
-                    semanticLabel:
-                        'Pixel art illustration of a student at a desk',
-                    child: _PixelHeroScene(),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/home/home.jpg',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  ColoredBox(color: AppColors.background),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 80,
+              vertical: isMobile ? 40 : 64,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: isMobile ? 520 : 640),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      AppColors.surface.withValues(alpha: 0.84),
+                      AppColors.surface.withValues(alpha: 0.62),
+                    ],
                   ),
-                ],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    flex: 5,
-                    child: _HeroText(onPlay: onPlay, isMobile: isMobile),
+                  border: Border.all(
+                    color: AppColors.surface.withValues(alpha: 0.75),
                   ),
-                  const SizedBox(width: 60),
-                  Expanded(
-                    flex: 4,
-                    child: A11yImage(
-                      semanticLabel:
-                          'Pixel art illustration of a student at a desk',
-                      child: _PixelHeroScene(),
-                    ),
-                  ),
-                ],
+                  borderRadius: AppTheme.buttonRadius,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: _HeroText(onPlay: onPlay, isMobile: isMobile),
+                ),
               ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -191,18 +214,10 @@ class _HeroText extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          color: AppColors.accent.withValues(alpha: 0.15),
-          child: Text(
-            'EDUCATIONAL SIMULATION',
-            style: TextStyle(
-              color: AppColors.accent,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 2.0,
-            ),
-          ),
+        SectionLabel(
+          text: 'EDUCATIONAL SIMULATION',
+          backgroundColor: AppColors.background.withValues(alpha: 0.92),
+          textColor: AppColors.textPrimary,
         ),
         const SizedBox(height: 16),
         ProjectIgniteLogo(height: isMobile ? 112 : 156),
@@ -210,12 +225,12 @@ class _HeroText extends StatelessWidget {
         ReadingText(
           'Work with your mind, protect your energy,\nand make it through the day.',
           style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 18,
+            color: AppColors.textPrimary,
+            fontSize: 22,
             height: 1.5,
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
         Wrap(
           spacing: 12,
           runSpacing: 8,
@@ -223,7 +238,7 @@ class _HeroText extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onPlay,
               icon: const Icon(Icons.play_arrow, size: 18),
-              label: const Text('Play Prototype'),
+              label: const Text('Play Game'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accent,
                 foregroundColor: AppColors.background,
@@ -232,11 +247,11 @@ class _HeroText extends StatelessWidget {
                   vertical: 14,
                 ),
                 textStyle: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(2)),
+                  borderRadius: AppTheme.buttonRadius,
                 ),
               ),
             ),
@@ -250,7 +265,7 @@ class _HeroText extends StatelessWidget {
                   vertical: 14,
                 ),
                 shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(2)),
+                  borderRadius: AppTheme.buttonRadius,
                 ),
               ),
               child: const Text('Learn More'),
@@ -260,292 +275,7 @@ class _HeroText extends StatelessWidget {
         const SizedBox(height: 24),
         Text(
           'Free · No account required · Educational content',
-          style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-        ),
-      ],
-    );
-  }
-}
-
-class _PixelHeroScene extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 4 / 3,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF0a0f1a),
-          border: Border.all(color: AppColors.border, width: 1),
-        ),
-        child: ClipRect(
-          child: Stack(
-            children: [
-              // Night sky gradient
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF050d1a), Color(0xFF1a0f2e)],
-                  ),
-                ),
-              ),
-              // Stars
-              ..._buildStars(),
-              // Moon
-              Positioned(
-                top: 24,
-                right: 40,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFe8d5a3),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              // Building 1 (tall)
-              Positioned(
-                bottom: 60,
-                left: 20,
-                child: _Building(
-                  width: 55,
-                  height: 120,
-                  color: const Color(0xFF1c2a3a),
-                  windowRows: 4,
-                  windowCols: 2,
-                ),
-              ),
-              // Building 2 (medium)
-              Positioned(
-                bottom: 60,
-                left: 85,
-                child: _Building(
-                  width: 40,
-                  height: 80,
-                  color: const Color(0xFF162230),
-                  windowRows: 3,
-                  windowCols: 2,
-                ),
-              ),
-              // Building 3 (right tall)
-              Positioned(
-                bottom: 60,
-                right: 15,
-                child: _Building(
-                  width: 60,
-                  height: 100,
-                  color: const Color(0xFF1e2d3d),
-                  windowRows: 3,
-                  windowCols: 3,
-                ),
-              ),
-              // Ground
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(height: 60, color: const Color(0xFF0d1520)),
-              ),
-              // Room window overlay (front building / room)
-              Positioned(bottom: 60, left: 0, right: 0, child: _RoomScene()),
-              // Pixel art label
-              Positioned(
-                bottom: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  color: AppColors.background.withValues(alpha: 0.7),
-                  child: Text(
-                    'PROTOTYPE',
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 8,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildStars() {
-    final positions = [
-      const Offset(30, 15),
-      const Offset(80, 25),
-      const Offset(140, 10),
-      const Offset(200, 30),
-      const Offset(260, 12),
-      const Offset(310, 28),
-      const Offset(55, 45),
-      const Offset(175, 50),
-      const Offset(230, 40),
-      const Offset(280, 55),
-      const Offset(110, 35),
-      const Offset(350, 20),
-    ];
-    return positions
-        .asMap()
-        .entries
-        .map(
-          (e) => Positioned(
-            left: e.value.dx,
-            top: e.value.dy,
-            child: Container(
-              width: e.key % 3 == 0 ? 2 : 1,
-              height: e.key % 3 == 0 ? 2 : 1,
-              color: const Color(0xFFe6edf3).withValues(alpha: 0.6),
-            ),
-          ),
-        )
-        .toList();
-  }
-}
-
-class _Building extends StatelessWidget {
-  final double width;
-  final double height;
-  final Color color;
-  final int windowRows;
-  final int windowCols;
-
-  const _Building({
-    required this.width,
-    required this.height,
-    required this.color,
-    required this.windowRows,
-    required this.windowCols,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      color: color,
-      child: Padding(
-        padding: const EdgeInsets.all(6),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(
-            windowRows,
-            (row) => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                windowCols,
-                (col) => Container(
-                  width: 6,
-                  height: 8,
-                  color: (row + col) % 3 != 0
-                      ? const Color(0xFFffd54f).withValues(alpha: 0.6)
-                      : const Color(0xFF1a2030),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoomScene extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 120,
-      child: Stack(
-        children: [
-          // Desk surface
-          Positioned(
-            bottom: 0,
-            left: 60,
-            right: 60,
-            child: Container(height: 8, color: const Color(0xFF3d2b1f)),
-          ),
-          // Monitor on desk
-          Positioned(
-            bottom: 8,
-            left: 90,
-            child: Column(
-              children: [
-                Container(
-                  width: 36,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1e1e1e),
-                    border: Border.all(
-                      color: const Color(0xFF58a6ff).withValues(alpha: 0.4),
-                      width: 1,
-                    ),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 28,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          colors: [
-                            const Color(0xFF1e3a5f),
-                            const Color(0xFF0d1117),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Container(width: 4, height: 6, color: const Color(0xFF2d2d2d)),
-              ],
-            ),
-          ),
-          // Books on desk
-          Positioned(
-            bottom: 8,
-            right: 75,
-            child: Row(
-              children: [
-                Container(width: 8, height: 20, color: const Color(0xFFd29922)),
-                Container(width: 8, height: 16, color: const Color(0xFF3fb950)),
-                Container(width: 8, height: 22, color: const Color(0xFFf85149)),
-              ],
-            ),
-          ),
-          // Character (simple pixel figure at desk)
-          Positioned(bottom: 14, left: 68, child: _PixelCharacter()),
-        ],
-      ),
-    );
-  }
-}
-
-class _PixelCharacter extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Hair
-        Container(width: 16, height: 4, color: const Color(0xFF4a3728)),
-        // Head
-        Container(
-          width: 14,
-          height: 14,
-          margin: const EdgeInsets.symmetric(horizontal: 1),
-          color: const Color(0xFFe8c99a),
-        ),
-        // Body
-        Container(
-          width: 18,
-          height: 12,
-          color: const Color(0xFF58a6ff).withValues(alpha: 0.8),
+          style: TextStyle(color: AppColors.textMuted, fontSize: 14),
         ),
       ],
     );
@@ -571,7 +301,7 @@ class _AboutSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel(text: 'ABOUT THIS GAME'),
+          const SectionLabel(text: 'ABOUT THIS GAME'),
           const SizedBox(height: 20),
           A11yHeading(
             'About Project Ignite',
@@ -584,7 +314,7 @@ class _AboutSection extends StatelessWidget {
               'Project Ignite is an educational simulation designed to help players understand neurodivergent burnout from the inside. You guide a fictional high school student through a single day, making choices that affect energy, focus, stress, and motivation.',
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 16,
+                fontSize: 17,
                 height: 1.7,
               ),
             ),
@@ -596,16 +326,13 @@ class _AboutSection extends StatelessWidget {
               'As burnout builds, activities a student normally enjoys may become unavailable — not as punishment, but to illustrate a real experience: wanting to do something does not always mean having the capacity to do it. By the end of the day, players see how their choices shaped the student\'s state and which strategies helped most.',
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 16,
+                fontSize: 17,
                 height: 1.7,
               ),
             ),
           ),
           const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: onPlay,
-            child: const Text('Play the Prototype'),
-          ),
+          ElevatedButton(onPressed: onPlay, child: const Text('Play the Game')),
         ],
       ),
     );
@@ -628,7 +355,7 @@ class _FeaturesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel(text: 'WHAT TO EXPECT'),
+          const SectionLabel(text: 'WHAT TO EXPECT'),
           const SizedBox(height: 20),
           A11yHeading(
             'Key Features',
@@ -767,9 +494,9 @@ class _FeatureCard extends StatelessWidget {
             feature.title,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
-              height: 1.4,
+              height: 1.45,
             ),
           ),
           const SizedBox(height: 8),
@@ -777,8 +504,8 @@ class _FeatureCard extends StatelessWidget {
             feature.description,
             style: TextStyle(
               color: AppColors.textSecondary,
-              fontSize: 13,
-              height: 1.5,
+              fontSize: 16,
+              height: 1.55,
             ),
           ),
         ],
@@ -787,10 +514,10 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-class _HowBurnoutWorksSection extends StatelessWidget {
+class _ExplorePreviewSection extends StatelessWidget {
   final bool isMobile;
 
-  const _HowBurnoutWorksSection({super.key, required this.isMobile});
+  const _ExplorePreviewSection({required this.isMobile});
 
   @override
   Widget build(BuildContext context) {
@@ -808,123 +535,415 @@ class _HowBurnoutWorksSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel(text: 'EDUCATIONAL CONTEXT'),
+          const SectionLabel(text: 'LEARN MORE'),
           const SizedBox(height: 20),
           A11yHeading(
-            'How Burnout Works',
+            'Explore the Project',
             style: Theme.of(context).textTheme.displaySmall,
           ),
-          const SizedBox(height: 24),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 32),
+          if (isMobile)
+            Column(
               children: [
-                _BurnoutPoint(
-                  icon: Icons.warning_amber_outlined,
-                  title: 'Burnout is not laziness',
+                _ExploreCard(
+                  icon: Icons.psychology_outlined,
+                  title: 'How Burnout Works',
                   body:
-                      'Burnout is a state that results from sustained demand exceeding available capacity. It accumulates over time and may not be immediately visible to others.',
+                      'Understand what neurodivergent burnout is, why masking adds to the load, and how recovery and coping take many forms.',
+                  buttonLabel: 'Learn How Burnout Works',
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.burnout),
                 ),
-                _BurnoutPoint(
-                  icon: Icons.battery_0_bar,
-                  title: 'Capacity changes with burnout',
+                const SizedBox(height: 16),
+                _ExploreCard(
+                  icon: Icons.people_outline,
+                  title: 'Meet the Team',
                   body:
-                      'When burnout is high, activities that are normally possible may become genuinely inaccessible — including activities the person enjoys and wants to do. This is not a choice or a character flaw.',
-                ),
-                _BurnoutPoint(
-                  icon: Icons.self_improvement,
-                  title: 'Recovery takes time',
-                  body:
-                      'Sustainable functioning requires adequate recovery. Choosing rest is not giving up — it is how capacity is restored for future demands.',
-                ),
-                _BurnoutPoint(
-                  icon: Icons.diversity_3,
-                  title: 'Experiences vary widely',
-                  body:
-                      'This simulation uses fictional examples. It does not diagnose, nor does it represent every autistic or ADHD experience. Players should not use this game to draw conclusions about themselves or others.',
+                      'Project Ignite is a student-built prototype developed for SNP-REACH 2026. Meet the people behind the project.',
+                  buttonLabel: 'Meet the Team',
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.team),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.border, width: 1),
-              borderRadius: BorderRadius.zero,
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: AppColors.accent, size: 18),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'This prototype is an educational tool. It is not a clinical assessment, diagnostic tool, or substitute for mental health support.',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                      height: 1.5,
+            )
+          else
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _ExploreCard(
+                      icon: Icons.psychology_outlined,
+                      title: 'How Burnout Works',
+                      body:
+                          'Understand what neurodivergent burnout is, why masking adds to the load, and how recovery and coping take many forms.',
+                      buttonLabel: 'Learn How Burnout Works',
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.burnout),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: _ExploreCard(
+                      icon: Icons.people_outline,
+                      title: 'Meet the Team',
+                      body:
+                          'Project Ignite is a student-built prototype developed for SNP-REACH 2026. Meet the people behind the project.',
+                      buttonLabel: 'Meet the Team',
+                      onTap: () => Navigator.pushNamed(context, AppRoutes.team),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
   }
 }
 
-class _BurnoutPoint extends StatelessWidget {
+class _ExploreCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String body;
+  final String buttonLabel;
+  final VoidCallback onTap;
 
-  const _BurnoutPoint({
+  const _ExploreCard({
     required this.icon,
     required this.title,
     required this.body,
+    required this.buttonLabel,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
-      child: Row(
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.accent, size: 28),
+          const SizedBox(height: 16),
+          A11yHeading(
+            title,
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ReadingText(
+            body,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 16,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(onPressed: onTap, child: Text(buttonLabel)),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Contact ───────────────────────────────────────────────────────────────────
+
+class _ContactSection extends StatefulWidget {
+  final bool isMobile;
+
+  const _ContactSection({super.key, required this.isMobile});
+
+  @override
+  State<_ContactSection> createState() => _ContactSectionState();
+}
+
+enum _ContactState { form, launched, failed }
+
+class _ContactSectionState extends State<_ContactSection> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _roleController = TextEditingController();
+  final _messageController = TextEditingController();
+
+  _ContactState _state = _ContactState.form;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _roleController.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final role = _roleController.text.trim();
+    final message = _messageController.text.trim();
+
+    final subject = 'Project Ignite – Contact Form Submission';
+    final body =
+        'From: $name\nReply-to: $email\nRole/Reason: $role\n\nMessage:\n$message\n\n---\nSent via the Project Ignite website contact form.';
+    final uri = Uri(
+      scheme: 'mailto',
+      path: 'Dereksha2008@gmail.com',
+      queryParameters: {'subject': subject, 'body': body},
+    );
+
+    try {
+      final launched = await launchUrl(uri);
+      if (mounted) {
+        setState(
+          () =>
+              _state = launched ? _ContactState.launched : _ContactState.failed,
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _state = _ContactState.failed);
+      }
+    }
+  }
+
+  void _reset() {
+    _formKey.currentState?.reset();
+    _nameController.clear();
+    _emailController.clear();
+    _roleController.clear();
+    _messageController.clear();
+    setState(() => _state = _ContactState.form);
+  }
+
+  InputDecoration _fieldDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      fillColor: AppColors.surface,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(2),
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(2),
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(2),
+        borderSide: BorderSide(color: AppColors.accent, width: 2),
+      ),
+      labelStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: widget.isMobile ? 20 : 80,
+        vertical: 56,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border(
+          top: BorderSide(color: AppColors.border, width: 1),
+          bottom: BorderSide(color: AppColors.border, width: 1),
+        ),
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 36,
-            height: 36,
-            margin: const EdgeInsets.only(right: 16),
-            color: AppColors.surfaceVariant,
-            alignment: Alignment.center,
-            child: Icon(icon, color: AppColors.accent, size: 18),
+          const SectionLabel(text: 'CONTACT US'),
+          const SizedBox(height: 20),
+          A11yHeading(
+            'Get in touch',
+            style: Theme.of(context).textTheme.displaySmall,
           ),
-          Expanded(
+          const SizedBox(height: 16),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                A11yHeading(
-                  title,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 6),
                 ReadingText(
-                  body,
+                  'Questions about the simulation, its educational content, or the project? We\'d love to hear from you.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 16,
                     height: 1.6,
                   ),
                 ),
+                const SizedBox(height: 24),
+                if (_state == _ContactState.form) ...[
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: _fieldDecoration('Full Name *'),
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Please enter your name'
+                              : null,
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _emailController,
+                          decoration: _fieldDecoration('Email address *'),
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!v.contains('@') || !v.contains('.')) {
+                              return 'Please enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _roleController,
+                          decoration: _fieldDecoration(
+                            'Role or reason for contacting (optional)',
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _messageController,
+                          decoration: _fieldDecoration('Message *'),
+                          maxLines: 5,
+                          validator: (v) => (v == null || v.trim().isEmpty)
+                              ? 'Please enter a message'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: _submit,
+                          child: const Text('Send via Email'),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Tapping 'Send via Email' opens your email app with a prefilled message. Your submission is only complete once you send the email from your app.",
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 14,
+                            height: 1.55,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else if (_state == _ContactState.launched) ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentAmber.withValues(alpha: 0.08),
+                      border: Border.all(
+                        color: AppColors.accentAmber.withValues(alpha: 0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.mail_outline,
+                              color: AppColors.accentAmber,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Email app opened',
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Your email app should have opened with a prefilled message addressed to Dereksha2008@gmail.com. Please review the message and press Send in your email app to complete your submission. Your message has not been sent yet.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                            height: 1.6,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: _reset,
+                          child: const Text('Fill out again'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.accentRed.withValues(alpha: 0.08),
+                      border: Border.all(
+                        color: AppColors.accentRed.withValues(alpha: 0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: AppColors.accentRed,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Could not open email app',
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Your email app could not be opened automatically. You can contact us directly at Dereksha2008@gmail.com.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                            height: 1.6,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: _reset,
+                          child: const Text('Try again'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -933,6 +952,8 @@ class _BurnoutPoint extends StatelessWidget {
     );
   }
 }
+
+// ── Resources ─────────────────────────────────────────────────────────────────
 
 class _ResourcesSection extends StatelessWidget {
   final bool isMobile;
@@ -950,7 +971,7 @@ class _ResourcesSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionLabel(text: 'IMPORTANT NOTICE'),
+          const SectionLabel(text: 'IMPORTANT NOTICE'),
           const SizedBox(height: 20),
           A11yHeading(
             'Resources & Disclaimer',
@@ -976,35 +997,35 @@ class _ResourcesSection extends StatelessWidget {
                       color: AppColors.accentAmber,
                       size: 20,
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'Educational Prototype — Not Medical Advice',
                         style: TextStyle(
                           color: AppColors.textPrimary,
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 Text(
                   'This prototype is an educational simulation intended for learning and discussion. It is not medical or mental health treatment, and does not replace professional support. If you or someone you know is experiencing burnout, please reach out to a trusted adult, school counselor, or mental health professional.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
-                    height: 1.6,
+                    fontSize: 16,
+                    height: 1.65,
                   ),
                 ),
-                SizedBox(height: 14),
+                const SizedBox(height: 14),
                 Text(
                   'The characters and scenarios in this prototype are fictional and created solely for educational purposes. They do not represent any real individuals or the full range of neurodivergent experiences.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
-                    height: 1.6,
+                    fontSize: 16,
+                    height: 1.65,
                   ),
                 ),
               ],
@@ -1035,12 +1056,12 @@ class _Footer extends StatelessWidget {
               children: [
                 Text(
                   'Project Ignite — Educational Prototype for SNP-REACH 2026',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Fictional content · Not for diagnosis',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
               ],
             )
@@ -1050,39 +1071,16 @@ class _Footer extends StatelessWidget {
                 Flexible(
                   child: Text(
                     'Project Ignite — Educational Prototype for SNP-REACH 2026',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Text(
                   'Fictional content · Not for diagnosis',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 12),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
               ],
             ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-
-  const _SectionLabel({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      color: AppColors.accent.withValues(alpha: 0.1),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: AppColors.accent,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 2.0,
-        ),
-      ),
     );
   }
 }

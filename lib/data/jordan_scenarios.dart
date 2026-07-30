@@ -2,11 +2,15 @@ import '../models/game_scenario.dart';
 import '../models/game_choice.dart';
 
 const List<GameScenario> jordanScenarios = [
+  // S1 — Room Change (unchanged)
   GameScenario(
     id: 'routine_disruption',
     title: 'Room Change',
     timeLabel: '8:30 AM',
     sceneTone: 'morning',
+    sceneImagePath: 'assets/stories/jordan_hallway.jpg',
+    sceneSemanticLabel:
+        'Illustration of Jordan in a school hallway facing an unexpected room change',
     description:
         'Jordan arrives at the usual classroom to find a note taped to the door: the room has been moved to a different wing, effective today. No email. No prior announcement. The new room number is unfamiliar. Other students brush past, seemingly already aware.',
     narration:
@@ -57,14 +61,23 @@ const List<GameScenario> jordanScenarios = [
       ),
     ],
   ),
+
+  // S2 — Unstructured Group Work (fixed: time 9:00 AM; carryover added for S1 positive paths)
   GameScenario(
     id: 'group_work_ambiguous',
     title: 'Unstructured Group Work',
-    timeLabel: '8:50 AM',
+    timeLabel: '9:00 AM',
     sceneTone: 'class',
+    sceneImagePath: 'assets/stories/jordan_classroom.jpg',
+    sceneSemanticLabel:
+        'Illustration of Jordan during unstructured group work in the classroom',
     carryoverNotes: {
       'routine_panic':
           'After the morning disruption, Jordan arrived in class already depleted. The ambiguity of the group project stacked on a nervous system that hadn\'t finished resetting.',
+      'routine_adapted':
+          'The grounding technique helped, but adapting still took something. Jordan arrived at class aware that the day was already asking more than planned for.',
+      'asked_for_help':
+          'Asking that nearby student worked. Jordan arrived with a small sense that asking is sometimes the fastest way through.',
     },
     description:
         'The teacher announces a group project, assigns groups at random, and distributes a vague instruction sheet. Phrases like "be creative" and "demonstrate your understanding" appear without rubric or clear success criteria. Jordan\'s group immediately begins talking over each other without a shared direction.',
@@ -117,198 +130,175 @@ const List<GameScenario> jordanScenarios = [
         educationalFeedback:
             'Introducing structure to an unstructured situation is a coping strategy that benefits both Jordan and the group. Systematic thinkers often bring exactly this kind of value to collaborative work. The effort of speaking up in a group setting — particularly when social dynamics are unclear — is real. When it works, it aligns the environment more closely with Jordan\'s processing style.',
       ),
+      GameChoice(
+        id: 'disclose_needs_directly',
+        label:
+            'Tell the teacher directly that explicit structure and clear criteria make a significant difference',
+        description:
+            'Approach the teacher before the group starts and explain briefly what kind of environment helps — without necessarily naming a diagnosis.',
+        energyDelta: -12,
+        stressDelta: -8,
+        selfAdvocacyDelta: 22,
+        focusDelta: 12,
+        motivationDelta: 8,
+        timeMinutesDelta: 70,
+        taskCompleted: 'Disclosed learning needs to teacher',
+        tag: 'disclosed_needs_to_teacher',
+        educationalFeedback:
+            'Telling a teacher directly what kind of environment supports learning is a form of disclosure that does not require naming a diagnosis. "Clear criteria help me engage" is both accurate and complete. When teachers respond supportively, this kind of disclosure reduces the ongoing cost of navigating ambiguity. It is not always safe — but when it works, it tends to be more sustainable than masking.',
+      ),
     ],
   ),
+
+  // S3 — Lunch Table (replaces cafeteria_sensory; integrates Conversation note; consumes S2 tags)
   GameScenario(
-    id: 'cafeteria_sensory',
-    title: 'Cafeteria Overload',
-    timeLabel: '10:00 AM',
-    sceneTone: 'class',
+    id: 'lunch_conversation',
+    title: 'Lunch Table',
+    timeLabel: '11:30 AM',
+    sceneTone: 'lunch',
+    sceneImagePath: 'assets/stories/jordan_cafeteria_conversation.jpg',
+    sceneSemanticLabel:
+        'Illustration of Jordan having a conversation in the school cafeteria',
     carryoverNotes: {
       'masked_confusing':
-          'The extended effort of masking confusion during group work left Jordan\'s sensory tolerance lower than usual. The cafeteria noise hit faster and harder than it might have otherwise.',
+          'Masking confusion through the group project took something from the reservoir. Lunch lands on a system that isn\'t fully recovered.',
+      'sought_clarity':
+          'Having asked for clear criteria gave Jordan a small sense of agency. Lunch feels slightly more manageable than the morning suggested.',
+      'initiated_structure':
+          'Introducing structure to the group worked. Jordan arrives at lunch with something to show for the morning — and a bit more bandwidth because of it.',
+      'disclosed_needs_to_teacher':
+          'Telling the teacher what helps was an act of naming. Lunch lands differently afterward — something external now holds what Jordan was carrying.',
     },
     description:
-        'The cafeteria is at full volume. Fluorescent lights hum overhead and one section flickers intermittently. Someone nearby is eating something with a strong smell. Chairs scrape on the floor in irregular bursts. Jordan has 30 minutes to eat before the afternoon.',
+        'Jordan is eating lunch with a group of friends. The cafeteria is loud — trays clatter, conversations overlap, and the fluorescent lights hum audibly. A friend is talking and expecting eye contact. Maintaining it feels like a task of its own.',
     narration:
-        '"The noise is coming from everywhere at once. I can feel it in my chest and behind my eyes."',
+        '"I can hear what they\'re saying. But keeping my eyes in the right place takes most of what I have left right now."',
     choices: [
       GameChoice(
-        id: 'sit_center_cafeteria',
-        label: 'Sit in the center of the cafeteria with classmates',
+        id: 'maintain_eye_contact',
+        label: 'Maintain eye contact throughout the conversation',
         description:
-            'Join the usual social group, even though the sensory environment is intense.',
-        energyDelta: -20,
-        stressDelta: 30,
-        focusDelta: -15,
-        motivationDelta: -10,
+            'Hold direct gaze as a way to appear engaged, even as it takes effort.',
+        energyDelta: -18,
+        stressDelta: 22,
+        focusDelta: -12,
+        motivationDelta: -5,
         timeMinutesDelta: 30,
-        tag: 'masked_lunch',
+        tag: 'masked_eye_contact',
         educationalFeedback:
-            'Remaining in a high-stimulation environment while masking discomfort has a significant cost. Social connection is important, but so is sensory regulation. When the environment exceeds a person\'s current sensory threshold, the body\'s stress response activates regardless of social expectations. The inability to "just ignore it" is not a weakness — it is neurological.',
+            'Maintaining direct eye contact throughout a conversation is a social expectation many autistic people find effortful or uncomfortable. The effort required to sustain it can reduce the capacity left for actually processing what is being said. Appearing to listen can come at the cost of being able to listen.',
       ),
       GameChoice(
-        id: 'find_quiet_room',
-        label: 'Take food to the school\'s quiet study room',
+        id: 'look_forehead_nose',
+        label: 'Look at the other person\'s forehead or nose instead',
         description:
-            'Eat alone in a low-stimulation environment. Study rooms are open for eating during lunch.',
-        energyDelta: 15,
-        stressDelta: -25,
-        focusDelta: 10,
-        timeMinutesDelta: 35,
-        tag: 'sensory_refuge',
-        educationalFeedback:
-            'Using a designated quiet space is a form of sensory accommodation. Eating in low-stimulation conditions allowed Jordan\'s nervous system to partially reset during the break. This is not antisocial — it is a necessary form of self-care. When quiet spaces exist at school, they represent a meaningful support for students with sensory sensitivities.',
-      ),
-      GameChoice(
-        id: 'earbuds_edge_seat',
-        label:
-            'Sit at the edge of the cafeteria with noise-reducing earbuds in',
-        description:
-            'Use earbuds to reduce audio input while remaining in the shared social space.',
-        energyDelta: 5,
-        stressDelta: -10,
+            'Shift gaze slightly — it reads as attentive without requiring the full sensory effort of direct eye contact.',
+        energyDelta: -6,
+        stressDelta: -8,
         focusDelta: 5,
         timeMinutesDelta: 30,
-        tag: 'earbuds_strategy',
+        tag: 'redirect_gaze',
         educationalFeedback:
-            'Using noise-reducing earbuds while eating is a practical sensory strategy. It doesn\'t eliminate all stimulation but meaningfully reduces the most taxing input. Positioning at the edge of the space reduces flanking noise. This reflects the kind of environmental modification many autistic people use independently to stay present in demanding settings.',
-      ),
-    ],
-  ),
-  GameScenario(
-    id: 'ambiguous_feedback',
-    title: 'Vague Feedback',
-    timeLabel: '11:15 AM',
-    sceneTone: 'class',
-    carryoverNotes: {
-      'sensory_refuge':
-          'The midday quiet reset helped. Jordan arrives at this afternoon period with slightly more processing bandwidth than the morning held.',
-      'earbuds_strategy':
-          'The earbuds helped keep the afternoon from compounding the morning. Jordan isn\'t fully recovered, but has more left than the cafeteria might have allowed.',
-    },
-    description:
-        'The teacher returns Jordan\'s essay with handwritten comments: "Good start, but needs more development. Push deeper." There is no rubric attached and no specific paragraph is marked. "Deeper" is not defined. The class moves on before Jordan can ask.',
-    narration:
-        '"I don\'t know what I did wrong. I can\'t fix something when I don\'t know what the problem is."',
-    choices: [
-      GameChoice(
-        id: 'guess_revision',
-        label: 'Try to revise the essay by guessing what "deeper" means',
-        description:
-            'Attempt a revision without clarification, hoping to satisfy the unstated expectation.',
-        energyDelta: -20,
-        stressDelta: 25,
-        focusDelta: -10,
-        timeMinutesDelta: 45,
-        tag: 'guessed_revision',
-        educationalFeedback:
-            'Revising without specific feedback requires inferring unstated expectations, which is particularly difficult for autistic students who work most effectively with explicit criteria. The result is high cognitive effort spent on an uncertain target. Even when the revision improves, the lack of clear criteria makes it hard to evaluate success — increasing rather than reducing stress.',
+            'Looking at the forehead or nose is a widely used strategy that reduces the sensory intensity of direct eye contact while allowing a person to remain present in the conversation. It is a practical adaptation that does not require disclosing anything — it shifts the load to a more manageable level.',
       ),
       GameChoice(
-        id: 'ask_teacher_after',
-        label: 'Ask the teacher after class for specific, concrete feedback',
+        id: 'look_away_naturally',
+        label: 'Look away when needed — glance back between thoughts',
         description:
-            'Wait until the class ends and ask the teacher to identify exactly what needs to be developed and where.',
-        energyDelta: -10,
-        stressDelta: -10,
-        selfAdvocacyDelta: 20,
-        timeMinutesDelta: 60,
-        taskCompleted: 'Requested specific, actionable feedback',
-        tag: 'asked_specific',
-        educationalFeedback:
-            'Requesting specific feedback is a skill and a form of self-advocacy. Concrete, criteria-based feedback is more accessible for many autistic learners. Asking for it is not demanding — it is what effective learning often requires. Teachers who respond clearly model that asking is safe, which makes future advocacy easier.',
-      ),
-      GameChoice(
-        id: 'write_questions_wait',
-        label:
-            'Write down the specific points of confusion and plan to raise them tomorrow',
-        description:
-            'Note exactly what is unclear before the end of class, and plan to bring those questions to the teacher or a parent.',
-        energyDelta: 0,
-        stressDelta: -5,
-        focusDelta: 5,
-        selfAdvocacyDelta: 5,
-        timeMinutesDelta: 20,
-        educationalFeedback:
-            'Writing down specific points of confusion externalizes the problem, which can reduce its cognitive weight. Planning a next step — even when immediate action isn\'t possible — provides a sense of agency. Knowing that the question is recorded and a plan exists is often enough to prevent rumination from consuming the rest of the afternoon.',
-      ),
-    ],
-  ),
-  GameScenario(
-    id: 'evening_decompression',
-    title: 'Final School Hour',
-    timeLabel: '2:00 PM',
-    endTimeLabel: '3:00 PM',
-    sceneTone: 'evening',
-    carryoverNotes: {
-      'masked_lunch':
-          'A full day of masking arrived at the front door with Jordan. By evening, even simple decisions take effort. The special interest isn\'t an escape — it\'s a genuine need.',
-    },
-    description:
-        'The final hour of the school day is beginning. The day involved unexpected changes, social masking, sensory challenges, and ambiguous demands. A mechanical engineering puzzle game — Jordan\'s current special interest — is waiting at home, and homework is due tomorrow.',
-    narration:
-        '"I just need the game. Everything else can wait — but I know it won\'t."',
-    choices: [
-      GameChoice(
-        id: 'force_homework',
-        label: 'Start homework immediately despite feeling completely depleted',
-        description:
-            'Push through and try to complete all assigned work before resting.',
-        energyDelta: -30,
-        stressDelta: 25,
-        motivationDelta: -20,
-        lifeSatisfactionDelta: -15,
-        timeMinutesDelta: 60,
-        taskCompleted: 'Homework attempted while depleted',
-        maxBurnoutAllowed: 70,
-        minEnergyRequired: 20,
-        unavailableReason:
-            'Jordan\'s system is too depleted to produce meaningful work right now. Attempting tasks at this level of exhaustion often results in errors, frustration, and deeper depletion — not completion. Recovery first is not giving up.',
-        educationalFeedback:
-            'Attempting cognitive work at very high burnout and very low energy often produces poor output and high distress. The homework may technically get done, but at a cost to tomorrow\'s functioning. Recovery is not laziness — it is the prerequisite for future capacity.',
-      ),
-      GameChoice(
-        id: 'special_interest_first',
-        label: 'Spend 45 minutes on the puzzle game, then do homework',
-        description:
-            'Use the special interest to regulate first, then switch to academic demands.',
-        energyDelta: 20,
-        stressDelta: -25,
-        motivationDelta: 25,
-        lifeSatisfactionDelta: 20,
-        timeMinutesDelta: 60,
-        taskCompleted: 'Used special interest for regulated recovery',
-        tag: 'special_interest_recovery',
-        educationalFeedback:
-            'Special interests serve a regulatory function for many autistic people — they are not merely entertainment. Engaging with a preferred topic activates deep motivation, reduces anxiety, and can restore executive function more efficiently than passive rest alone. Using the special interest first, then doing homework, is a valid and sustainable strategy.',
-      ),
-      GameChoice(
-        id: 'one_task_then_rest',
-        label: 'Complete only the most urgent task, then rest fully',
-        description:
-            'Identify the single most critical piece of homework and complete that — nothing else tonight.',
-        energyDelta: -5,
-        stressDelta: -10,
+            'Allow natural gaze breaks during the conversation rather than holding eye contact continuously.',
+        energyDelta: -4,
+        stressDelta: -15,
+        focusDelta: 8,
         motivationDelta: 5,
-        lifeSatisfactionDelta: 5,
-        timeMinutesDelta: 60,
-        taskCompleted: 'Prioritized single task, protected recovery time',
+        timeMinutesDelta: 30,
+        tag: 'natural_gaze_breaks',
         educationalFeedback:
-            'Prioritizing a single essential task and protecting the rest of the evening for recovery is a sustainable strategy. Not everything can or needs to be done every day. Identifying what is most critical and drawing a clear boundary around it is a form of self-regulation that supports longer-term functioning.',
+            'Allowing natural gaze breaks reduces the cognitive load of social interaction and leaves more capacity for actually engaging with the conversation. Gaze behavior varies widely across cultures and individuals. For many autistic people, intermittent eye contact is both more comfortable and more authentic than sustained direct gaze.',
       ),
       GameChoice(
-        id: 'full_rest',
-        label: 'Complete shutdown — no homework, full rest',
+        id: 'quiet_corner_lunch',
+        label: 'Suggest moving to a quieter spot to eat and talk',
         description:
-            'The day has genuinely exceeded capacity. Rest completely. Nothing else tonight.',
-        energyDelta: 25,
-        stressDelta: -30,
-        motivationDelta: 10,
-        timeMinutesDelta: 60,
+            'Mention to the group that the cafeteria is loud and ask if anyone wants to find a calmer place nearby.',
+        energyDelta: 10,
+        stressDelta: -18,
+        focusDelta: 8,
+        selfAdvocacyDelta: 12,
+        timeMinutesDelta: 30,
+        taskCompleted: 'Advocated for a quieter environment at lunch',
+        tag: 'quiet_lunch_spot',
         educationalFeedback:
-            'When capacity has genuinely been exceeded, complete rest is often the most responsible option available. Homework done in a shutdown state is rarely retained or produced well. Rest is not giving up — it is what makes tomorrow possible. Recognizing when a full stop is necessary is a sign of self-knowledge, not failure.',
+            'Suggesting a different environment is a form of low-stakes self-advocacy that also protects sensory wellbeing. A quieter setting can make conversation more accessible — for Jordan and potentially for others. Framing the request around the noise rather than a personal difficulty is often easier and more likely to be met positively.',
       ),
     ],
   ),
+
+  // S4 — Classroom Overload (replaces ambiguous_feedback; integrates Classroom Sensory Overload note; consumes S3 tags)
+  GameScenario(
+    id: 'classroom_sensory_overload',
+    title: 'Classroom Overload',
+    timeLabel: '1:00 PM',
+    sceneTone: 'class',
+    sceneImagePath: 'assets/stories/jordan_classroom.jpg',
+    sceneSemanticLabel:
+        'Illustration of Jordan in a classroom with sensory overload from lights and sounds',
+    carryoverNotes: {
+      'masked_eye_contact':
+          'After masking through lunch, Jordan\'s sensory threshold is lower than usual. The overhead light flicker in this classroom feels sharper than it would otherwise.',
+      'quiet_lunch_spot':
+          'The quieter lunch helped. Jordan enters the afternoon period with slightly more available than the morning threatened.',
+    },
+    description:
+        'The afternoon class has started. Overhead lights are bright and one tube flickers slightly. The HVAC hum has become impossible to ignore. A classmate nearby taps a pencil in an irregular rhythm. Jordan\'s sweater collar — manageable this morning — now feels scratchy against the skin.',
+    narration:
+        '"Every single thing in this room is asking for my attention at once. I\'m supposed to be listening to a lecture."',
+    choices: [
+      GameChoice(
+        id: 'endure_sensory',
+        label: 'Stay seated and push through the rest of class',
+        description:
+            'Keep working and try to ignore the sensory input. Do not draw attention.',
+        energyDelta: -22,
+        stressDelta: 28,
+        focusDelta: -18,
+        timeMinutesDelta: 50,
+        tag: 'endured_class_sensory',
+        educationalFeedback:
+            'Staying in a high-stimulation environment without accommodation places the body in a prolonged stress response. The effort of suppressing sensory input competes with the cognitive effort of following the lesson. Over a full class period, this accumulates — leaving less capacity for everything that comes after.',
+      ),
+      GameChoice(
+        id: 'use_earplugs',
+        label: 'Take noise-reducing earplugs from a bag and put them in',
+        description:
+            'Quietly retrieve and insert earplugs to reduce audio input while staying in the room.',
+        energyDelta: -5,
+        stressDelta: -15,
+        focusDelta: 12,
+        timeMinutesDelta: 50,
+        tag: 'earplugs_classroom',
+        educationalFeedback:
+            'Noise-reducing tools — earplugs, earbuds, or earmuffs — reduce auditory input to a more manageable level. Using them during class is a sensory accommodation, not a distraction. Many autistic people carry sensory tools as a routine part of managing their environment. Having the tool available shifts the choice from endure-or-leave to adjust.',
+      ),
+      GameChoice(
+        id: 'request_sensory_break',
+        label: 'Quietly ask the teacher for a brief sensory break',
+        description:
+            'Wait for a pause in the lesson and ask the teacher privately if a short break outside the classroom is possible.',
+        energyDelta: 5,
+        stressDelta: -22,
+        focusDelta: 10,
+        selfAdvocacyDelta: 22,
+        timeMinutesDelta: 55,
+        taskCompleted: 'Requested and received a sensory break',
+        tag: 'sensory_break_granted',
+        educationalFeedback:
+            'Asking for a sensory break is a direct form of self-advocacy. It requires knowing what is needed, identifying the right moment, and being willing to ask. Not all teachers will respond the same way — when they do respond supportively, it models that asking is safe. When the environment is genuinely overloading, a brief break often allows better engagement afterward.',
+      ),
+    ],
+  ),
+
+  // S5 — Academic Accommodations: moved to shared_scenarios.dart as
+  //       buildAccommodationsScenario(jordan). Wired in character_registry.dart
+  //       at slot 5 (2:00 PM, endTimeLabel: 3:00 PM). Consumes S4 tags:
+  //       endured_class_sensory · earplugs_classroom · sensory_break_granted.
 ];

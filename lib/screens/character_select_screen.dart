@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
+import '../app/session_navigation.dart';
+import '../data/character_registry.dart';
 import '../app/theme.dart';
-import '../data/alex_scenarios.dart';
-import '../data/demo_character.dart';
-import '../data/jordan_character.dart';
-import '../data/jordan_scenarios.dart';
-import '../data/maya_character.dart';
-import '../data/maya_scenarios.dart';
 import '../models/character_profile.dart';
 import '../models/game_scenario.dart';
 import '../models/game_state.dart';
 import '../widgets/site_navigation.dart';
+import '../widgets/section_label.dart';
 
 class CharacterSelectScreen extends StatelessWidget {
   final GameState gameState;
@@ -24,7 +21,7 @@ class CharacterSelectScreen extends StatelessWidget {
     List<GameScenario> scenarios,
   ) {
     gameState.selectCharacter(character, scenarios);
-    Navigator.pushReplacementNamed(context, AppRoutes.play);
+    SessionNavigation.openPlay(context, gameState);
   }
 
   @override
@@ -36,7 +33,7 @@ class CharacterSelectScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          SiteNavigation(activeSection: AppRoutes.select),
+          SiteNavigation(activeSection: AppRoutes.select, gameState: gameState),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -48,6 +45,8 @@ class CharacterSelectScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _SelectHeader(),
+                    const SizedBox(height: 24),
+                    _SimulationIntro(),
                     const SizedBox(height: 32),
                     _CharacterGrid(
                       isMobile: isMobile,
@@ -67,6 +66,110 @@ class CharacterSelectScreen extends StatelessWidget {
   }
 }
 
+class _SimulationIntro extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ABOUT THIS SIMULATION',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ReadingText(
+            'Project Ignite is an educational simulation of one neurodivergent student\'s school day. The goal is not to win — it\'s to explore how demands, recovery, and self-advocacy interact.',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _IntroBullet(
+            title: 'Choose a character',
+            body:
+                'Each profile has different strengths, burnout triggers, and recovery strategies. The day unfolds differently depending on who you play as.',
+          ),
+          const SizedBox(height: 8),
+          _IntroBullet(
+            title: 'Make choices across 5 self-paced scenarios',
+            body:
+                'Decisions affect energy, stress, and capacity. Some choices carry forward — later scenarios may reflect what happened earlier in the day.',
+          ),
+          const SizedBox(height: 8),
+          _IntroBullet(
+            title: 'Watch the meters',
+            body:
+                'Burnout rises when demands consistently exceed recovery. There are no right or wrong choices — the meters show what each path costs and what it preserves.',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IntroBullet extends StatelessWidget {
+  final String title;
+  final String body;
+
+  const _IntroBullet({required this.title, required this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 4,
+          height: 4,
+          margin: const EdgeInsets.only(top: 5, right: 8),
+          decoration: BoxDecoration(
+            color: AppColors.accentText,
+            shape: BoxShape.circle,
+          ),
+        ),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '$title: ',
+                  style: TextStyle(
+                    color: AppColors.accentText,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    height: 1.5,
+                  ),
+                ),
+                TextSpan(
+                  text: body,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _CharacterGrid extends StatelessWidget {
   final bool isMobile;
   final void Function(CharacterProfile, List<GameScenario>) onSelect;
@@ -75,36 +178,26 @@ class _CharacterGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cards = [
-      _CharacterCard(
-        character: demoCharacter,
-        scenarios: alexScenarios,
-        accentColor: AppColors.accent,
-        onSelect: onSelect,
-      ),
-      _CharacterCard(
-        character: jordanCharacter,
-        scenarios: jordanScenarios,
-        accentColor: AppColors.accentPurple,
-        onSelect: onSelect,
-      ),
-      _CharacterCard(
-        character: mayaCharacter,
-        scenarios: mayaScenarios,
-        accentColor: AppColors.accentAmber,
-        onSelect: onSelect,
-      ),
+    final accents = [
+      AppColors.accentText,
+      AppColors.accentPurple,
+      AppColors.accentAmber,
     ];
+    final cards = registeredCharacters.asMap().entries.map((entry) {
+      final registration = entry.value;
+      return _CharacterCard(
+        character: registration.profile,
+        scenarios: registration.scenarios,
+        accentColor: accents[entry.key % accents.length],
+        onSelect: onSelect,
+      );
+    }).toList();
 
     if (isMobile) {
       return Column(
-        children: [
-          cards[0],
-          const SizedBox(height: 20),
-          cards[1],
-          const SizedBox(height: 20),
-          cards[2],
-        ],
+        children:
+            cards.expand((card) => [card, const SizedBox(height: 20)]).toList()
+              ..removeLast(),
       );
     }
 
@@ -129,25 +222,13 @@ class _SelectHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          color: AppColors.accent.withValues(alpha: 0.15),
-          child: Text(
-            'CHOOSE YOUR CHARACTER',
-            style: TextStyle(
-              color: AppColors.accent,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 2.0,
-            ),
-          ),
-        ),
+        const SectionLabel(text: 'CHOOSE YOUR CHARACTER'),
         const SizedBox(height: 14),
         A11yHeading(
           'Who will you guide today?',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 28,
+            fontSize: 32,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -158,7 +239,7 @@ class _SelectHeader extends StatelessWidget {
             'Each character navigates burnout differently. Choose one to begin their day — the choices you make will reflect their specific strengths, needs, and recovery strategies.',
             style: TextStyle(
               color: AppColors.textSecondary,
-              fontSize: 14,
+              fontSize: 16,
               height: 1.6,
             ),
           ),
@@ -214,13 +295,7 @@ class _CharacterCardState extends State<_CharacterCard> {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    color: accent.withValues(alpha: 0.15),
-                    alignment: Alignment.center,
-                    child: Icon(Icons.person, color: accent, size: 28),
-                  ),
+                  _CharacterPortrait(character: c, accentColor: accent),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -230,7 +305,7 @@ class _CharacterCardState extends State<_CharacterCard> {
                           c.name,
                           style: TextStyle(
                             color: AppColors.textPrimary,
-                            fontSize: 20,
+                            fontSize: 24,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -238,7 +313,7 @@ class _CharacterCardState extends State<_CharacterCard> {
                           '${c.age} · ${c.context}',
                           style: TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 12,
+                            fontSize: 14,
                           ),
                         ),
                         const SizedBox(height: 3),
@@ -249,7 +324,7 @@ class _CharacterCardState extends State<_CharacterCard> {
                               '${c.gender.toUpperCase()} · ${c.pronouns.toUpperCase()}',
                               style: TextStyle(
                                 color: accent,
-                                fontSize: 10,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.7,
                               ),
@@ -259,23 +334,21 @@ class _CharacterCardState extends State<_CharacterCard> {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    color: accent.withValues(alpha: 0.15),
-                    child: Text(
-                      c.neurodivergenceType.toUpperCase(),
-                      style: TextStyle(
-                        color: accent,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ),
                 ],
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                color: accent.withValues(alpha: 0.15),
+                child: Text(
+                  c.neurodivergenceType.toUpperCase(),
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.5,
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               Divider(color: AppColors.border, height: 1),
@@ -284,7 +357,7 @@ class _CharacterCardState extends State<_CharacterCard> {
                 c.shortDescription,
                 style: TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 13,
+                  fontSize: 14,
                   height: 1.6,
                 ),
               ),
@@ -315,10 +388,10 @@ class _CharacterCardState extends State<_CharacterCard> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      '${widget.scenarios.length} scenarios · ~10 minutes',
+                      '${widget.scenarios.length} short scenarios · self-paced',
                       style: TextStyle(
                         color: AppColors.textMuted,
-                        fontSize: 12,
+                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -330,11 +403,12 @@ class _CharacterCardState extends State<_CharacterCard> {
                 child: ElevatedButton(
                   onPressed: () => widget.onSelect(c, widget.scenarios),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: accent,
-                    foregroundColor: AppColors.background,
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.textPrimary,
+                    side: BorderSide(color: AppColors.borderBright),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                      borderRadius: AppTheme.buttonRadius,
                     ),
                   ),
                   child: Text('Play as ${c.name}'),
@@ -368,7 +442,7 @@ class _CardSection extends StatelessWidget {
           label,
           style: TextStyle(
             color: color,
-            fontSize: 9,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
           ),
@@ -391,7 +465,7 @@ class _CardSection extends StatelessWidget {
                     item,
                     style: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 12,
+                      fontSize: 14,
                       height: 1.5,
                     ),
                   ),
@@ -424,13 +498,131 @@ class _Disclaimer extends StatelessWidget {
               'These fictional characters are created for educational purposes. They do not represent all people with ADHD, autism, or AuDHD. Neurodivergent experiences vary widely — strengths, challenges, and support needs differ from person to person.',
               style: TextStyle(
                 color: AppColors.textMuted,
-                fontSize: 12,
+                fontSize: 14,
                 height: 1.5,
                 fontStyle: FontStyle.italic,
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Character portrait ─────────────────────────────────────────────────────────
+
+class _CharacterPortrait extends StatelessWidget {
+  final CharacterProfile character;
+  final Color accentColor;
+
+  const _CharacterPortrait({
+    required this.character,
+    required this.accentColor,
+  });
+
+  // Derives a hair-tone index from the character id — stable and future-proof.
+  int get _hairIndex => character.id.codeUnitAt(0) % 3;
+
+  static const _hairTones = [
+    Color(0xFF3D2D1F), // dark warm brown
+    Color(0xFF1C1C2E), // near-black / dark cool
+    Color(0xFF5C3D1E), // medium chestnut
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final hairColor = _hairTones[_hairIndex];
+    final noAnimation = MediaQuery.of(context).disableAnimations;
+
+    final portrait = character.portraitImagePath != null
+        ? Semantics(
+            label: 'Portrait of ${character.name}',
+            child: Image.asset(
+              character.portraitImagePath!,
+              width: 100,
+              height: 120,
+              fit: BoxFit.contain,
+              errorBuilder: (_, err, stack) => _PixelPortrait(
+                accentColor: accentColor,
+                hairColor: hairColor,
+                characterName: character.name,
+              ),
+            ),
+          )
+        : _PixelPortrait(
+            accentColor: accentColor,
+            hairColor: hairColor,
+            characterName: character.name,
+          );
+
+    if (noAnimation) return portrait;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 450),
+      builder: (context, value, child) => Opacity(opacity: value, child: child),
+      child: portrait,
+    );
+  }
+}
+
+class _PixelPortrait extends StatelessWidget {
+  final Color accentColor;
+  final Color hairColor;
+  final String characterName;
+
+  const _PixelPortrait({
+    required this.accentColor,
+    required this.hairColor,
+    required this.characterName,
+  });
+
+  static const _skinTone = Color(0xFFE8C99A);
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$characterName — pixel portrait',
+      child: Container(
+        width: 100,
+        height: 120,
+        color: accentColor.withValues(alpha: 0.08),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Hair
+              Container(width: 44, height: 10, color: hairColor),
+              // Head
+              Container(width: 40, height: 30, color: _skinTone),
+              // Body / shirt
+              Container(
+                width: 52,
+                height: 30,
+                color: accentColor.withValues(alpha: 0.85),
+              ),
+              // Legs
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 16,
+                    height: 12,
+                    color: accentColor.withValues(alpha: 0.6),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    width: 16,
+                    height: 12,
+                    color: accentColor.withValues(alpha: 0.6),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -6,6 +6,8 @@ class PixelPanel extends StatelessWidget {
   final String? title;
   final Color? borderColor;
   final Color? backgroundColor;
+  final Color? titleBackgroundColor;
+  final Color? titleTextColor;
   final EdgeInsetsGeometry? padding;
   final bool showCornerAccents;
 
@@ -15,6 +17,8 @@ class PixelPanel extends StatelessWidget {
     this.title,
     this.borderColor,
     this.backgroundColor,
+    this.titleBackgroundColor,
+    this.titleTextColor,
     this.padding,
     this.showCornerAccents = true,
   });
@@ -36,7 +40,13 @@ class PixelPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (title != null) _TitleBar(title: title!, borderColor: border),
+              if (title != null)
+                _TitleBar(
+                  title: title!,
+                  borderColor: border,
+                  backgroundColor: titleBackgroundColor,
+                  textColor: titleTextColor,
+                ),
               Padding(
                 padding: padding ?? const EdgeInsets.all(16),
                 child: child,
@@ -58,23 +68,30 @@ class PixelPanel extends StatelessWidget {
 class _TitleBar extends StatelessWidget {
   final String title;
   final Color borderColor;
+  final Color? backgroundColor;
+  final Color? textColor;
 
-  const _TitleBar({required this.title, required this.borderColor});
+  const _TitleBar({
+    required this.title,
+    required this.borderColor,
+    this.backgroundColor,
+    this.textColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
+        color: backgroundColor ?? AppColors.surfaceVariant,
         border: Border(bottom: BorderSide(color: borderColor, width: 1)),
       ),
       child: Text(
         title,
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-          fontSize: 13,
+          fontSize: 16,
           letterSpacing: 1.0,
-          color: AppColors.textSecondary,
+          color: textColor ?? AppColors.textSecondary,
         ),
       ),
     );

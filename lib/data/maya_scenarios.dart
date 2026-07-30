@@ -7,6 +7,9 @@ const List<GameScenario> mayaScenarios = [
     title: 'A Changed Plan',
     timeLabel: '8:30 AM',
     sceneTone: 'morning',
+    sceneImagePath: 'assets/stories/time_Awareness.jpg',
+    sceneSemanticLabel:
+        'Illustration representing an unexpected schedule change and time planning',
     description:
         'Maya opens the course portal before class and finds that today\'s studio session has moved online. The announcement was posted late last night, and the video link is buried in a long message. Maya had planned the morning around being on campus.',
     narration:
@@ -62,6 +65,9 @@ const List<GameScenario> mayaScenarios = [
     title: 'Too Many Signals',
     timeLabel: '9:00 AM',
     sceneTone: 'class',
+    sceneImagePath: 'assets/stories/bedroom_background.jpg',
+    sceneSemanticLabel:
+        'Illustration of a home workspace during an online class session',
     carryoverNotes: {
       'maya_rushed_change':
           'Maya joins with several tabs still open and the sense of being behind. Each new notification feels more urgent than it is.',
@@ -115,77 +121,26 @@ const List<GameScenario> mayaScenarios = [
       ),
     ],
   ),
-  GameScenario(
-    id: 'maya_lunch_reset',
-    title: 'The Between-Class Gap',
-    timeLabel: '11:00 AM',
-    sceneTone: 'class',
-    carryoverNotes: {
-      'maya_split_attention':
-          'After an hour of switching attention, even choosing lunch feels like another task. Maya\'s body is asking for fewer inputs.',
-      'maya_protected_focus':
-          'Protecting one channel during studio left Maya with enough bandwidth to notice what would actually help next.',
-    },
-    description:
-        'There are 40 minutes before the next class. The student center is busy and a friend invites Maya to eat there. Maya also needs food, a bathroom break, and a moment away from screens before an afternoon critique.',
-    narration:
-        '"I miss my friend, but I can feel the crowded room costing more than I have right now."',
-    choices: [
-      GameChoice(
-        id: 'maya_push_social_lunch',
-        label: 'Eat in the crowded student center and stay socially engaged',
-        description:
-            'Join the group even though the noise and conversation move quickly.',
-        energyDelta: -14,
-        stressDelta: 16,
-        motivationDelta: 5,
-        lifeSatisfactionDelta: 5,
-        timeMinutesDelta: 40,
-        tag: 'maya_socially_drained',
-        educationalFeedback:
-            'Connection can be meaningful and still be costly in a high-demand environment. The tradeoff is not a moral one: choosing social time may be right sometimes, while choosing regulation may be essential at other times.',
-      ),
-      GameChoice(
-        id: 'maya_quiet_lunch',
-        label: 'Take food to a quiet corner and use sensory tools',
-        description:
-            'Eat somewhere calm, use headphones or a fidget, and let the nervous system settle.',
-        energyDelta: 15,
-        stressDelta: -20,
-        focusDelta: 10,
-        timeMinutesDelta: 40,
-        taskCompleted: 'Took a low-sensory lunch reset',
-        tag: 'maya_quiet_reset',
-        educationalFeedback:
-            'A low-sensory lunch is active recovery. Food, quiet, movement, and sensory tools can restore capacity enough to make the afternoon more possible. Solitude in this context is regulation, not rejection.',
-      ),
-      GameChoice(
-        id: 'maya_invite_one_friend',
-        label: 'Invite one friend to eat in a quieter spot',
-        description:
-            'Suggest a bench outside the student center so Maya can keep connection while reducing sensory demand.',
-        energyDelta: 7,
-        stressDelta: -10,
-        motivationDelta: 8,
-        lifeSatisfactionDelta: 8,
-        selfAdvocacyDelta: 10,
-        timeMinutesDelta: 40,
-        tag: 'maya_adapted_connection',
-        educationalFeedback:
-            'Adapting the setting can make connection more sustainable. Naming a different plan gives friends a concrete way to show care, and it avoids treating Maya\'s needs and relationships as competing priorities.',
-      ),
-    ],
-  ),
+
+  // S3 — Between-Class Gap: moved to shared_scenarios.dart as
+  //       buildLunchBreakScenario(maya). Wired in character_registry.dart at
+  //       slot 3 (11:00 AM). Consumes S2 tags: maya_split_attention ·
+  //       maya_protected_focus. Sets: maya_socially_drained · maya_quiet_reset.
   GameScenario(
     id: 'maya_critique',
     title: 'Project Critique',
     timeLabel: '1:00 PM',
     sceneTone: 'class',
+    sceneImagePath: 'assets/stories/maya_disclosing_to_teacher.jpg',
+    sceneSemanticLabel:
+        'Illustration of Maya speaking with an instructor during a project critique',
     carryoverNotes: {
       'maya_socially_drained':
           'The student center took more energy than Maya expected. The thought of speaking in front of the class now feels physically louder.',
       'maya_quiet_reset':
           'The quieter break did not solve every demand, but Maya arrives with more room to think and respond.',
+      'maya_adapted_connection':
+          'Choosing a quieter way to connect protected Maya\'s energy without giving up the relationship. The critique still asks a lot, but there is more room to process it.',
     },
     description:
         'In critique, each student must share a project draft and receive rapid verbal feedback. Maya has strong ideas but needs a moment to process comments before responding. The instructor says, “Jump in whenever you\'re ready.”',
@@ -237,68 +192,27 @@ const List<GameScenario> mayaScenarios = [
         educationalFeedback:
             'Offering a visual or written route into discussion can align the task with a person\'s strengths. Flexible participation formats make room for different communication styles while preserving the substance of the critique.',
       ),
-    ],
-  ),
-  GameScenario(
-    id: 'maya_evening',
-    title: 'Closing the Day',
-    timeLabel: '2:30 PM',
-    endTimeLabel: '3:00 PM',
-    sceneTone: 'evening',
-    carryoverNotes: {
-      'maya_masked_critique':
-          'The effort of responding on demand followed Maya into the afternoon. The to-do list now feels like a wall rather than a set of options.',
-      'maya_processing_time':
-          'Giving the ideas time to arrive helped Maya leave critique with less of the usual replaying and self-doubt.',
-    },
-    description:
-        'The day is ending, but a project task and two emails remain. Maya also wants to spend time refining an exhibit concept that is genuinely exciting. The work matters, and so does recovering enough to return tomorrow.',
-    narration:
-        '"I need a plan that leaves something of me for tomorrow, not one that proves I can ignore tonight."',
-    choices: [
       GameChoice(
-        id: 'maya_all_nighter_plan',
-        label: 'Commit to finishing every remaining task tonight',
+        id: 'maya_disclose_processing_needs',
+        label:
+            'Tell the instructor after the critique that real-time response formats are harder — and ask about alternatives',
         description:
-            'Make a long list and plan to keep working until everything is done.',
-        energyDelta: -25,
-        stressDelta: 22,
-        motivationDelta: -12,
-        timeMinutesDelta: 30,
+            'After the session, approach the instructor and explain that processing-heavy real-time formats present more difficulty, and ask whether written follow-up responses are an option.',
+        energyDelta: -10,
+        stressDelta: -8,
+        selfAdvocacyDelta: 25,
+        focusDelta: 8,
+        motivationDelta: 5,
+        timeMinutesDelta: 60,
+        taskCompleted: 'Disclosed processing needs to instructor',
+        tag: 'maya_disclosed_to_instructor',
         educationalFeedback:
-            'Trying to solve every unfinished task with more effort can turn urgency into burnout. When capacity is low, a longer plan may create more pressure than progress. Rest is part of completing work sustainably.',
-      ),
-      GameChoice(
-        id: 'maya_choose_one_next_step',
-        label: 'Choose one small task, schedule the rest, then decompress',
-        description:
-            'Send one important email, put the project on tomorrow\'s calendar, and transition into a preferred low-demand activity.',
-        energyDelta: 8,
-        stressDelta: -15,
-        focusDelta: 5,
-        motivationDelta: 10,
-        lifeSatisfactionDelta: 8,
-        taskCompleted: 'Made a sustainable end-of-day plan',
-        tag: 'maya_sustainable_close',
-        educationalFeedback:
-            'A small, visible next step reduces the fear of forgetting without demanding that Maya finish a whole second day of work. Planning recovery alongside responsibilities supports consistency better than relying on crisis-level effort.',
-      ),
-      GameChoice(
-        id: 'maya_body_double_start',
-        label: 'Ask a friend for a short body-doubling session',
-        description:
-            'Work quietly alongside someone for 20 minutes to start the first task, then reassess capacity.',
-        energyDelta: 2,
-        stressDelta: -10,
-        focusDelta: 12,
-        selfAdvocacyDelta: 10,
-        motivationDelta: 8,
-        timeMinutesDelta: 30,
-        taskCompleted: 'Used body-doubling to start a task',
-        tag: 'maya_body_doubling',
-        educationalFeedback:
-            'Body-doubling — doing a task alongside another person — can make starting and staying with a task more accessible for many people with ADHD. It is a collaborative support, not dependence, and it can coexist with autistic needs for low-pressure communication.',
+            'Telling an instructor what processing conditions work better is a disclosure — whether or not a diagnosis is mentioned. "Real-time verbal responses are harder for me than written ones" is both accurate and actionable. Instructors who respond by offering alternatives model that the course format is not fixed. This kind of disclosure can change the terms of participation without requiring formal documentation to be in place first.',
       ),
     ],
   ),
+  // S5 — Academic Accommodations: moved to shared_scenarios.dart as
+  //       buildAccommodationsScenario(maya). Wired in character_registry.dart
+  //       at slot 5 (2:30 PM, endTimeLabel: 3:00 PM). Consumes S4 tags:
+  //       maya_masked_critique · maya_processing_time · maya_visual_strength.
 ];

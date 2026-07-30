@@ -1,0 +1,3 @@
+Name: Team Member One
+Role: Project Lead / Researcher
+Bio: Led the research direction for Project Ignite, including scenario design, educational content development, and alignment with neurodivergent burnout literature.

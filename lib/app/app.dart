@@ -5,8 +5,10 @@ import '../models/game_state.dart';
 import '../screens/character_select_screen.dart';
 import '../screens/game_overview_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/how_burnout_works_screen.dart';
 import '../screens/results_screen.dart';
 import '../screens/simulation_screen.dart';
+import '../screens/team_screen.dart';
 import 'routes.dart';
 import 'theme.dart';
 
@@ -52,29 +54,120 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
   Widget _a11yRoute(Widget Function() buildScreen) {
     return ListenableBuilder(
       listenable: _a11y,
-      builder: (_, _) => buildScreen(),
+      // Keep the initial navigator route alive while preferences load. Replacing
+      // MaterialApp with a temporary splash app loses a direct web URL before
+      // its route can be generated.
+      builder: (_, _) => _a11yReady
+          ? buildScreen()
+          : Scaffold(
+              backgroundColor: AppColors.background,
+              body: const SizedBox.shrink(),
+            ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Show nothing until prefs are loaded to avoid a flash of default settings
-    if (!_a11yReady) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          backgroundColor: Color(0xFF0d1117),
-          body: SizedBox.shrink(),
-        ),
-      );
-    }
-
     return ListenableBuilder(
       listenable: _a11y,
       builder: (_, _) {
         // Sync the global palette flag BEFORE the tree (theme + screens) builds,
         // so every AppColors.* read resolves to the correct palette this frame.
         AppColors.highContrast = _a11y.highContrast;
+        Route<dynamic> generateRoute(RouteSettings settings) {
+          final requestedRoute = settings.name ?? AppRoutes.home;
+          final knownRoutes = {
+            AppRoutes.home,
+            AppRoutes.about,
+            AppRoutes.select,
+            AppRoutes.play,
+            AppRoutes.results,
+            AppRoutes.burnout,
+            AppRoutes.resources,
+            AppRoutes.team,
+            AppRoutes.contact,
+          };
+          final route = knownRoutes.contains(requestedRoute)
+              ? _gameState.routeFor(requestedRoute)
+              : AppRoutes.home;
+          // A public or character-selection route is a session boundary.
+          // This also covers direct URLs and browser history entries that
+          // bypass the screen-level navigation intents.
+          if (route == AppRoutes.home ||
+              route == AppRoutes.about ||
+              route == AppRoutes.select ||
+              route == AppRoutes.burnout ||
+              route == AppRoutes.resources ||
+              route == AppRoutes.team ||
+              route == AppRoutes.contact) {
+            _gameState.endSession();
+          }
+          final effectiveSettings = RouteSettings(name: route);
+          switch (route) {
+            case AppRoutes.home:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) =>
+                    _a11yRoute(() => HomeScreen(gameState: _gameState)),
+              );
+            case AppRoutes.about:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) =>
+                    _a11yRoute(() => GameOverviewScreen(gameState: _gameState)),
+              );
+            case AppRoutes.burnout:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) => _a11yRoute(
+                  () => HowBurnoutWorksScreen(gameState: _gameState),
+                ),
+              );
+            case AppRoutes.team:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) =>
+                    _a11yRoute(() => TeamScreen(gameState: _gameState)),
+              );
+            case AppRoutes.resources:
+            case AppRoutes.contact:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) => _a11yRoute(
+                  () => HomeScreen(
+                    gameState: _gameState,
+                    initialSection: route.substring(1),
+                  ),
+                ),
+              );
+            case AppRoutes.select:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) => _a11yRoute(
+                  () => CharacterSelectScreen(gameState: _gameState),
+                ),
+              );
+            case AppRoutes.play:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) =>
+                    _a11yRoute(() => SimulationScreen(gameState: _gameState)),
+              );
+            case AppRoutes.results:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) =>
+                    _a11yRoute(() => ResultsScreen(gameState: _gameState)),
+              );
+            default:
+              return MaterialPageRoute(
+                settings: const RouteSettings(name: AppRoutes.home),
+                builder: (_) =>
+                    _a11yRoute(() => HomeScreen(gameState: _gameState)),
+              );
+          }
+        }
+
         return MediaQuery(
           // Apply font-size scaling globally via the Flutter text scaler
           data: MediaQueryData.fromView(
@@ -92,7 +185,7 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
               // is applied per reading widget (ReadingText/A11yHeading) for the
               // same reason. This DefaultTextStyle only covers any stray text
               // rendered outside a Material.
-              return DefaultTextStyle(
+              final routeChild = DefaultTextStyle(
                 style: DefaultTextStyle.of(context).style.copyWith(
                   height: (1.4 * _a11y.lineHeightScale).clamp(0.8, 3.0),
                   letterSpacing: _a11y.letterSpacingDelta.clamp(-0.5, 8.0),
@@ -103,57 +196,28 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
                       ? AppTheme.readableFontFallback
                       : null,
                 ),
-                child: AccessibilityOverlay(
-                  a11yState: _a11y,
-                  navigatorKey: _navigatorKey,
-                  child: child!,
-                ),
+                child: child!,
+              );
+              // Keep the direct route mounted but avoid rendering content with
+              // temporary default preferences before they are restored.
+              if (!_a11yReady) return routeChild;
+              return AccessibilityOverlay(
+                a11yState: _a11y,
+                navigatorKey: _navigatorKey,
+                child: routeChild,
               );
             },
-            initialRoute: AppRoutes.home,
-            onGenerateRoute: (settings) {
-              switch (settings.name) {
-                case AppRoutes.home:
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) =>
-                        _a11yRoute(() => HomeScreen(gameState: _gameState)),
-                  );
-                case AppRoutes.about:
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) => _a11yRoute(
-                      () => GameOverviewScreen(gameState: _gameState),
-                    ),
-                  );
-                case AppRoutes.select:
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) => _a11yRoute(
-                      () => CharacterSelectScreen(gameState: _gameState),
-                    ),
-                  );
-                case AppRoutes.play:
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) => _a11yRoute(
-                      () => SimulationScreen(gameState: _gameState),
-                    ),
-                  );
-                case AppRoutes.results:
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) =>
-                        _a11yRoute(() => ResultsScreen(gameState: _gameState)),
-                  );
-                default:
-                  return MaterialPageRoute(
-                    settings: settings,
-                    builder: (_) =>
-                        _a11yRoute(() => HomeScreen(gameState: _gameState)),
-                  );
-              }
-            },
+            // Use the platform route so direct web URLs flow through the same
+            // lifecycle guards as in-app navigation.
+            initialRoute:
+                WidgetsBinding.instance.platformDispatcher.defaultRouteName,
+            // A deep link must be a single route. The Material default creates
+            // both '/' and the requested route, which makes browser Back reveal
+            // a page the visitor did not navigate from.
+            onGenerateInitialRoutes: (initialRoute) => [
+              generateRoute(RouteSettings(name: initialRoute)),
+            ],
+            onGenerateRoute: generateRoute,
           ),
         );
       },

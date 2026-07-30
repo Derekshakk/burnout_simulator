@@ -197,7 +197,9 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.accessibility_new));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('High Contrast'));
+    final highContrastControl = find.text('High Contrast');
+    await tester.ensureVisible(highContrastControl);
+    await tester.tap(highContrastControl);
     await tester.pumpAndSettle();
 
     // Palette swapped and the underlying screen rebuilt with the new color.
@@ -221,7 +223,7 @@ void main() {
     expect(AppColors.highContrast, isTrue);
 
     // Start the simulation; the setting must remain active on the new route.
-    await tester.tap(find.text('Play Prototype').first);
+    await tester.tap(find.text('Play Game').first);
     await tester.pumpAndSettle();
     expect(AppColors.highContrast, isTrue);
     expect(tester.takeException(), isNull);

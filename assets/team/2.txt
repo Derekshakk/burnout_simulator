@@ -1,0 +1,3 @@
+Name: Team Member Two
+Role: UX Design / Accessibility
+Bio: Designed the simulation experience, visual hierarchy, and accessibility features. Ensured the interface works across screen sizes and meets readability standards.

@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../accessibility/accessibility_scope.dart';
 import '../app/routes.dart';
+import '../app/session_navigation.dart';
 import '../app/theme.dart';
+import '../models/game_state.dart';
 import 'project_ignite_logo.dart';
 
 class SiteNavigation extends StatefulWidget {
   final String activeSection;
-  final VoidCallback? onScrollToBurnout;
+  final GameState gameState;
   final VoidCallback? onScrollToResources;
+  final VoidCallback? onScrollToContact;
 
   const SiteNavigation({
     super.key,
     required this.activeSection,
-    this.onScrollToBurnout,
+    required this.gameState,
     this.onScrollToResources,
+    this.onScrollToContact,
   });
 
   @override
@@ -25,17 +30,30 @@ class _SiteNavigationState extends State<SiteNavigation> {
 
   void _navigate(BuildContext context, String route) {
     setState(() => _menuOpen = false);
-    if (ModalRoute.of(context)?.settings.name != route) {
-      Navigator.pushNamed(context, route);
-    }
-  }
-
-  void _handleBurnout(BuildContext context) {
-    setState(() => _menuOpen = false);
-    if (widget.onScrollToBurnout != null) {
-      widget.onScrollToBurnout!();
-    } else {
-      Navigator.pushNamed(context, AppRoutes.home);
+    switch (route) {
+      case AppRoutes.home:
+        SessionNavigation.goHome(context, widget.gameState);
+      case AppRoutes.about:
+        SessionNavigation.goAbout(context, widget.gameState);
+      case AppRoutes.burnout:
+        SessionNavigation.goHomeSection(
+          context,
+          widget.gameState,
+          AppRoutes.burnout,
+        );
+      case AppRoutes.team:
+        SessionNavigation.goHomeSection(
+          context,
+          widget.gameState,
+          AppRoutes.team,
+        );
+      case AppRoutes.play:
+      case AppRoutes.select:
+        SessionNavigation.startNewGame(context, widget.gameState);
+      default:
+        if (ModalRoute.of(context)?.settings.name != route) {
+          Navigator.pushNamed(context, route);
+        }
     }
   }
 
@@ -44,14 +62,35 @@ class _SiteNavigationState extends State<SiteNavigation> {
     if (widget.onScrollToResources != null) {
       widget.onScrollToResources!();
     } else {
-      Navigator.pushNamed(context, AppRoutes.home);
+      SessionNavigation.goHomeSection(
+        context,
+        widget.gameState,
+        AppRoutes.resources,
+      );
+    }
+  }
+
+  void _handleContact(BuildContext context) {
+    setState(() => _menuOpen = false);
+    if (widget.onScrollToContact != null) {
+      widget.onScrollToContact!();
+    } else {
+      SessionNavigation.goHomeSection(
+        context,
+        widget.gameState,
+        AppRoutes.contact,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final isMobile = width < 960;
+    final isMobile = width < 1100;
+    // At larger mobile widths, keep the direct Play control. On narrower
+    // layouts (including enlarged-text users), place it in the menu instead
+    // so the header cannot overflow.
+    final showMobilePlayButton = isMobile && width >= 500;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -59,9 +98,12 @@ class _SiteNavigationState extends State<SiteNavigation> {
         Container(
           height: 56,
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: AppColors.publicNavigationBackground,
             border: Border(
-              bottom: BorderSide(color: AppColors.border, width: 1),
+              bottom: BorderSide(
+                color: AppColors.textPrimary.withValues(alpha: 0.45),
+                width: 1,
+              ),
             ),
           ),
           child: Padding(
@@ -85,9 +127,9 @@ class _SiteNavigationState extends State<SiteNavigation> {
                   ),
                   _NavLink(
                     label: 'How Burnout Works',
-                    route: 'burnout',
+                    route: AppRoutes.burnout,
                     activeSection: widget.activeSection,
-                    onTap: () => _handleBurnout(context),
+                    onTap: () => _navigate(context, AppRoutes.burnout),
                   ),
                   _NavLink(
                     label: 'Resources',
@@ -95,18 +137,32 @@ class _SiteNavigationState extends State<SiteNavigation> {
                     activeSection: widget.activeSection,
                     onTap: () => _handleResources(context),
                   ),
+                  _NavLink(
+                    label: 'Team',
+                    route: AppRoutes.team,
+                    activeSection: widget.activeSection,
+                    onTap: () => _navigate(context, AppRoutes.team),
+                  ),
+                  _NavLink(
+                    label: 'Contact',
+                    route: 'contact',
+                    activeSection: widget.activeSection,
+                    onTap: () => _handleContact(context),
+                  ),
                   const SizedBox(width: 16),
                   _PlayButton(
                     onTap: () => _navigate(context, AppRoutes.play),
                     isActive: widget.activeSection == AppRoutes.play,
                   ),
                 ] else ...[
-                  if (widget.activeSection != AppRoutes.play)
+                  if (showMobilePlayButton &&
+                      widget.activeSection != AppRoutes.play) ...[
                     _PlayButton(
                       onTap: () => _navigate(context, AppRoutes.play),
                       isActive: false,
                     ),
-                  const SizedBox(width: 8),
+                    const SizedBox(width: 8),
+                  ],
                   IconButton(
                     icon: Icon(
                       _menuOpen ? Icons.close : Icons.menu,
@@ -124,8 +180,9 @@ class _SiteNavigationState extends State<SiteNavigation> {
           _MobileMenu(
             activeSection: widget.activeSection,
             onNavigate: (route) => _navigate(context, route),
-            onBurnout: () => _handleBurnout(context),
             onResources: () => _handleResources(context),
+            onContact: () => _handleContact(context),
+            showPlayItem: !showMobilePlayButton,
           ),
       ],
     );
@@ -167,11 +224,9 @@ class _NavLinkState extends State<_NavLink> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = _isActive
-        ? AppColors.accent
-        : _hovered
-        ? AppColors.textPrimary
-        : AppColors.textSecondary;
+    final textColor = AppColors.textPrimary.withValues(
+      alpha: _hovered || _isActive ? 1 : 0.82,
+    );
 
     final highlightLinks =
         AccessibilityScope.maybeOf(context)?.highlightLinks ?? false;
@@ -184,37 +239,59 @@ class _NavLinkState extends State<_NavLink> {
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: _isActive ? AppColors.accent : Colors.transparent,
-                  width: 2,
-                ),
-                top: highlightLinks && !_isActive
-                    ? BorderSide(color: AppColors.borderBright, width: 1)
-                    : BorderSide.none,
-                left: highlightLinks && !_isActive
-                    ? BorderSide(color: AppColors.borderBright, width: 1)
-                    : BorderSide.none,
-                right: highlightLinks && !_isActive
-                    ? BorderSide(color: AppColors.borderBright, width: 1)
-                    : BorderSide.none,
-              ),
+        child: FocusableActionDetector(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+            SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          },
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                widget.onTap();
+                return null;
+              },
             ),
-            child: Text(
-              widget.label,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 13,
-                fontWeight: _isActive ? FontWeight.w600 : FontWeight.w400,
-                decoration: highlightLinks && !_isActive
-                    ? TextDecoration.underline
+          },
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: _isActive || _hovered
+                    ? AppColors.surface.withValues(
+                        alpha: _isActive ? 0.55 : 0.3,
+                      )
                     : null,
-                decorationColor: textColor,
+                border: Border(
+                  bottom: BorderSide(
+                    color: _isActive
+                        ? AppColors.textPrimary
+                        : Colors.transparent,
+                    width: 2,
+                  ),
+                  top: highlightLinks && !_isActive
+                      ? BorderSide(color: AppColors.borderBright, width: 1)
+                      : BorderSide.none,
+                  left: highlightLinks && !_isActive
+                      ? BorderSide(color: AppColors.borderBright, width: 1)
+                      : BorderSide.none,
+                  right: highlightLinks && !_isActive
+                      ? BorderSide(color: AppColors.borderBright, width: 1)
+                      : BorderSide.none,
+                ),
+                borderRadius: AppTheme.compactButtonRadius,
+              ),
+              child: Text(
+                widget.label,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 16,
+                  fontWeight: _isActive ? FontWeight.w600 : FontWeight.w400,
+                  decoration: highlightLinks && !_isActive
+                      ? TextDecoration.underline
+                      : null,
+                  decorationColor: textColor,
+                ),
               ),
             ),
           ),
@@ -236,6 +313,7 @@ class _PlayButton extends StatefulWidget {
 
 class _PlayButtonState extends State<_PlayButton> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -243,39 +321,51 @@ class _PlayButtonState extends State<_PlayButton> {
         AccessibilityScope.maybeOf(context)?.highlightLinks ?? false;
     return Semantics(
       button: true,
-      label: 'Play Prototype',
+      label: 'Play Game',
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: widget.isActive
-                  ? AppColors.accent
-                  : _hovered
-                  ? AppColors.accent.withValues(alpha: 0.9)
-                  : AppColors.accent.withValues(alpha: 0.15),
-              border: Border.all(
-                color: AppColors.accent,
-                width: highlightLinks ? 2 : 1,
-              ),
+        child: FocusableActionDetector(
+          onShowFocusHighlight: (f) => setState(() => _focused = f),
+          shortcuts: {
+            SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+            SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          },
+          actions: {
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                widget.onTap();
+                return null;
+              },
             ),
-            child: Text(
-              'Play Prototype',
-              style: TextStyle(
-                color: widget.isActive || _hovered
-                    ? AppColors.background
-                    : AppColors.accent,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-                decoration: highlightLinks ? TextDecoration.underline : null,
-                decorationColor: widget.isActive || _hovered
-                    ? AppColors.background
-                    : AppColors.accent,
+          },
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: _hovered || widget.isActive || _focused
+                    ? AppColors.surface.withValues(alpha: 0.8)
+                    : AppColors.surface.withValues(alpha: 0.55),
+                border: Border.all(
+                  color: AppColors.textPrimary,
+                  width: highlightLinks ? 2 : 1,
+                ),
+                borderRadius: AppTheme.compactButtonRadius,
+              ),
+              child: Text(
+                'Play Game',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                  decoration: highlightLinks ? TextDecoration.underline : null,
+                  decorationColor: widget.isActive || _hovered
+                      ? AppColors.textPrimary
+                      : AppColors.textPrimary,
+                ),
               ),
             ),
           ),
@@ -288,14 +378,16 @@ class _PlayButtonState extends State<_PlayButton> {
 class _MobileMenu extends StatelessWidget {
   final String activeSection;
   final void Function(String route) onNavigate;
-  final VoidCallback onBurnout;
   final VoidCallback onResources;
+  final VoidCallback onContact;
+  final bool showPlayItem;
 
   const _MobileMenu({
     required this.activeSection,
     required this.onNavigate,
-    required this.onBurnout,
     required this.onResources,
+    required this.onContact,
+    required this.showPlayItem,
   });
 
   @override
@@ -303,12 +395,23 @@ class _MobileMenu extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
+        color: AppColors.publicNavigationBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.textPrimary.withValues(alpha: 0.45),
+            width: 1,
+          ),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (showPlayItem)
+            _MobileMenuItem(
+              label: 'Play Game',
+              isActive: activeSection == AppRoutes.play,
+              onTap: () => onNavigate(AppRoutes.play),
+            ),
           _MobileMenuItem(
             label: 'Home',
             isActive: activeSection == AppRoutes.home,
@@ -321,13 +424,23 @@ class _MobileMenu extends StatelessWidget {
           ),
           _MobileMenuItem(
             label: 'How Burnout Works',
-            isActive: activeSection == 'burnout',
-            onTap: onBurnout,
+            isActive: activeSection == AppRoutes.burnout,
+            onTap: () => onNavigate(AppRoutes.burnout),
           ),
           _MobileMenuItem(
             label: 'Resources',
             isActive: activeSection == 'resources',
             onTap: onResources,
+          ),
+          _MobileMenuItem(
+            label: 'Team',
+            isActive: activeSection == AppRoutes.team,
+            onTap: () => onNavigate(AppRoutes.team),
+          ),
+          _MobileMenuItem(
+            label: 'Contact',
+            isActive: activeSection == 'contact',
+            onTap: onContact,
           ),
         ],
       ),
@@ -350,16 +463,19 @@ class _MobileMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: AppTheme.compactButtonRadius,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         decoration: BoxDecoration(
+          color: isActive ? AppColors.surface.withValues(alpha: 0.55) : null,
           border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
+          borderRadius: AppTheme.compactButtonRadius,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isActive ? AppColors.accent : AppColors.textPrimary,
-            fontSize: 15,
+            color: AppColors.textPrimary,
+            fontSize: 16,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

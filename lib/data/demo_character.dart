@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../models/character_profile.dart';
 
 const demoCharacter = CharacterProfile(
@@ -43,4 +45,11 @@ const demoCharacter = CharacterProfile(
   initialMotivation: 75,
   initialLifeSatisfaction: 70,
   initialSelfAdvocacy: 50,
+  portraitImagePath: 'assets/characters/alex.jpg',
+  appearance: CharacterAppearance(
+    skinTone: Color(0xFF9B642F),
+    hairColor: Color(0xFF26190F),
+    topColor: Color(0xFF3C3A6B),
+    bottomColor: Color(0xFF4B6B87),
+  ),
 );

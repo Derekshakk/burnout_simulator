@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../app/theme.dart';
 import 'accessibility_scope.dart';
 import 'selective_bold_text.dart';
 
@@ -66,7 +68,7 @@ class A11yHeading extends StatelessWidget {
 
     // Emphasize headings with a subtle highlight fill, a thicker underline,
     // and a heavier weight (more than color alone).
-    final accent = (baseStyle?.color ?? Colors.white);
+    final accent = baseStyle?.color ?? AppColors.textPrimary;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
@@ -115,13 +117,13 @@ class A11yImage extends StatelessWidget {
       child: Container(
         constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
         decoration: BoxDecoration(
-          color: const Color(0xFF161B22),
-          border: Border.all(color: const Color(0xFF30363D), width: 1),
+          color: AppColors.overlaySurface,
+          border: Border.all(color: AppColors.overlayBorder, width: 1),
         ),
         alignment: Alignment.center,
-        child: const Icon(
+        child: Icon(
           Icons.image_not_supported_outlined,
-          color: Color(0xFF484F58),
+          color: AppColors.overlayHandle,
           size: 24,
         ),
       ),
@@ -144,9 +146,9 @@ class A11yLink extends StatelessWidget {
     final highlight = a11y?.highlightLinks ?? false;
     final baseStyle =
         style ??
-        const TextStyle(
-          color: Color(0xFF58A6FF),
-          fontSize: 14,
+        TextStyle(
+          color: AppColors.focusColor,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
         );
 
@@ -165,7 +167,7 @@ class A11yLink extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
         decoration: BoxDecoration(
           border: Border.all(
-            color: (baseStyle.color ?? const Color(0xFF58A6FF)).withValues(
+            color: (baseStyle.color ?? AppColors.focusColor).withValues(
               alpha: 0.5,
             ),
             width: 1,
@@ -176,11 +178,25 @@ class A11yLink extends StatelessWidget {
       );
     }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Semantics(link: true, label: label, child: text),
+    return FocusableActionDetector(
+      shortcuts: const <ShortcutActivator, Intent>{
+        SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+        SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+      },
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            onTap?.call();
+            return null;
+          },
+        ),
+      },
+      child: GestureDetector(
+        onTap: onTap,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Semantics(link: true, label: label, child: text),
+        ),
       ),
     );
   }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../accessibility/a11y_widgets.dart';
-import '../app/routes.dart';
+import '../app/session_navigation.dart';
 import '../app/theme.dart';
 import '../models/game_scenario.dart';
 import '../models/game_state.dart';
+import '../widgets/character_portrait.dart';
 import '../widgets/choice_button.dart';
 import '../widgets/educational_feedback_card.dart';
 import '../widgets/pixel_panel.dart';
@@ -27,7 +28,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
     widget.gameState.addListener(_onStateChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && widget.gameState.selectedCharacter == null) {
-        Navigator.pushReplacementNamed(context, AppRoutes.select);
+        SessionNavigation.chooseCharacter(context, widget.gameState);
       }
     });
   }
@@ -40,7 +41,7 @@ class _SimulationScreenState extends State<SimulationScreen> {
 
   void _onStateChanged() {
     if (widget.gameState.isFinished && mounted) {
-      Navigator.pushReplacementNamed(context, AppRoutes.results);
+      SessionNavigation.openResults(context, widget.gameState);
     }
   }
 
@@ -109,19 +110,27 @@ class _SimNavBar extends StatelessWidget {
                 size: 18,
               ),
               tooltip: 'Return to home',
-              onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                context,
-                AppRoutes.home,
-                (_) => false,
+              onPressed: () => SessionNavigation.goHome(context, gameState),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: const ProjectIgniteLogo(height: 28),
               ),
             ),
             const SizedBox(width: 8),
-            const ProjectIgniteLogo(height: 32),
-            const Spacer(),
-            ListenableBuilder(
-              listenable: gameState,
-              builder: (_, child) =>
-                  _TimeDisplay(time: gameState.currentTimeLabel),
+            Flexible(
+              fit: FlexFit.loose,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: ListenableBuilder(
+                  listenable: gameState,
+                  builder: (_, child) =>
+                      _TimeDisplay(time: gameState.currentTimeLabel),
+                ),
+              ),
             ),
           ],
         ),
@@ -152,7 +161,7 @@ class _TimeDisplay extends StatelessWidget {
             time,
             style: TextStyle(
               color: AppColors.textPrimary,
-              fontSize: 13,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               fontFeatures: [FontFeature.tabularFigures()],
             ),
@@ -239,13 +248,20 @@ class _ScenePanel extends StatelessWidget {
     if (scenarios.isEmpty) return const SizedBox.shrink();
     final scenario = scenarios[gameState.currentScenarioIndex];
 
+    final semanticLabel =
+        scenario.sceneSemanticLabel ??
+        (scenario.sceneImagePath != null
+            ? 'Scene illustration for ${scenario.title}'
+            : 'Pixel art scene for scenario ${scenario.sceneTone}');
+
     return PixelPanel(
       title: 'SCENE',
       padding: EdgeInsets.zero,
       child: A11yImage(
-        semanticLabel: 'Pixel art scene for scenario ${scenario.sceneTone}',
+        semanticLabel: semanticLabel,
         child: _SceneArtwork(
           sceneTone: scenario.sceneTone,
+          sceneImagePath: scenario.sceneImagePath,
           burnoutLevel: gameState.burnoutLevel,
           reduceEffects: gameState.reduceVisualEffects,
           hasSensoryOverload: gameState.hasSensoryOverload,
@@ -258,6 +274,7 @@ class _ScenePanel extends StatelessWidget {
 
 class _SceneArtwork extends StatelessWidget {
   final String sceneTone;
+  final String? sceneImagePath;
   final double burnoutLevel;
   final bool reduceEffects;
   final bool hasSensoryOverload;
@@ -265,6 +282,7 @@ class _SceneArtwork extends StatelessWidget {
 
   const _SceneArtwork({
     required this.sceneTone,
+    this.sceneImagePath,
     required this.burnoutLevel,
     required this.reduceEffects,
     required this.hasSensoryOverload,
@@ -274,13 +292,26 @@ class _SceneArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget artwork;
-    switch (sceneTone) {
-      case 'morning':
-        artwork = _MorningScene(height: height);
-      case 'class':
-        artwork = _ClassScene(height: height);
-      default:
-        artwork = _EveningScene(height: height);
+
+    if (sceneImagePath != null) {
+      artwork = Image.asset(
+        sceneImagePath!,
+        fit: BoxFit.cover,
+        alignment: Alignment.center,
+      );
+    } else {
+      switch (sceneTone) {
+        case 'morning':
+          artwork = _MorningScene(height: height);
+        case 'hallway':
+          artwork = _HallwayScene(height: height);
+        case 'lunch':
+          artwork = _LunchScene(height: height);
+        case 'class':
+          artwork = _ClassScene(height: height);
+        default:
+          artwork = _EveningScene(height: height);
+      }
     }
 
     if (reduceEffects || burnoutLevel < 40) {
@@ -298,7 +329,7 @@ class _SceneArtwork extends StatelessWidget {
         children: [
           artwork,
           Container(
-            color: const Color(0xFFd29922).withValues(alpha: overlayOpacity),
+            color: AppColors.illustrationBook.withValues(alpha: overlayOpacity),
           ),
           if (burnoutLevel >= 70)
             Positioned(top: 8, right: 8, child: _BrainFogBadge()),
@@ -331,7 +362,7 @@ class _BrainFogBadge extends StatelessWidget {
             'Brain fog',
             style: TextStyle(
               color: AppColors.accentAmber,
-              fontSize: 9,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
@@ -363,7 +394,7 @@ class _SensoryOverloadBadge extends StatelessWidget {
             'Sensory overload',
             style: TextStyle(
               color: AppColors.accentRed,
-              fontSize: 9,
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
             ),
@@ -387,11 +418,14 @@ class _MorningScene extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF1a1025), Color(0xFF3d2010)],
+                colors: [
+                  AppColors.illustrationBuilding,
+                  AppColors.illustrationDesk,
+                ],
               ),
             ),
           ),
@@ -403,20 +437,20 @@ class _MorningScene extends StatelessWidget {
               width: 48,
               height: 60,
               decoration: BoxDecoration(
-                color: const Color(0xFFffa040).withValues(alpha: 0.3),
-                border: Border.all(color: const Color(0xFF5a3a20), width: 2),
+                color: AppColors.illustrationWarm.withValues(alpha: 0.3),
+                border: Border.all(color: AppColors.illustrationTrim, width: 2),
               ),
               child: Column(
                 children: [
                   Expanded(
                     child: Container(
-                      color: const Color(0xFFff8c00).withValues(alpha: 0.3),
+                      color: AppColors.illustrationWarm.withValues(alpha: 0.3),
                     ),
                   ),
-                  Container(height: 2, color: const Color(0xFF5a3a20)),
+                  Container(height: 2, color: AppColors.illustrationTrim),
                   Expanded(
                     child: Container(
-                      color: const Color(0xFFffa040).withValues(alpha: 0.2),
+                      color: AppColors.illustrationWarm.withValues(alpha: 0.2),
                     ),
                   ),
                 ],
@@ -427,13 +461,13 @@ class _MorningScene extends StatelessWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(height: 20, color: const Color(0xFF3d2b1f)),
+            child: Container(height: 20, color: AppColors.illustrationDesk),
           ),
           Positioned(
             bottom: 20,
             left: 0,
             right: 0,
-            child: Container(height: 4, color: const Color(0xFF5a3d26)),
+            child: Container(height: 4, color: AppColors.illustrationTrim),
           ),
           // Papers/notebook
           Positioned(
@@ -442,7 +476,7 @@ class _MorningScene extends StatelessWidget {
             child: Container(
               width: 50,
               height: 38,
-              color: const Color(0xFFe6edf3),
+              color: AppColors.textPrimary,
               child: Padding(
                 padding: const EdgeInsets.all(4),
                 child: Column(
@@ -452,7 +486,7 @@ class _MorningScene extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 3),
                       child: Container(
                         height: 2,
-                        color: const Color(0xFF8b949e).withValues(alpha: 0.5),
+                        color: AppColors.textSecondary.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -467,12 +501,12 @@ class _MorningScene extends StatelessWidget {
             child: Container(
               width: 14,
               height: 18,
-              decoration: const BoxDecoration(color: Color(0xFF58a6ff)),
+              decoration: BoxDecoration(color: AppColors.accent),
               child: Center(
                 child: Container(
                   width: 6,
                   height: 6,
-                  color: const Color(0xFF3d7ab3),
+                  color: AppColors.accentDark,
                 ),
               ),
             ),
@@ -481,8 +515,8 @@ class _MorningScene extends StatelessWidget {
             bottom: 20,
             left: 80,
             child: _PixelFigure(
-              headColor: const Color(0xFFe8c99a),
-              bodyColor: const Color(0xFF58a6ff),
+              headColor: AppColors.illustrationSkin,
+              bodyColor: AppColors.accent,
               posture: 'sitting',
             ),
           ),
@@ -505,11 +539,14 @@ class _ClassScene extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF0d1520), Color(0xFF162030)],
+                colors: [
+                  AppColors.illustrationGround,
+                  AppColors.illustrationBuildingDim,
+                ],
               ),
             ),
           ),
@@ -519,12 +556,12 @@ class _ClassScene extends StatelessWidget {
             right: 20,
             child: Container(
               height: 50,
-              color: const Color(0xFF1e2d3d),
+              color: AppColors.illustrationBuilding,
               child: Center(
                 child: Container(
                   width: 80,
                   height: 30,
-                  color: const Color(0xFFe6edf3).withValues(alpha: 0.1),
+                  color: AppColors.textPrimary.withValues(alpha: 0.1),
                   child: Center(
                     child: Container(
                       width: 60,
@@ -549,14 +586,14 @@ class _ClassScene extends StatelessWidget {
             bottom: 0,
             left: 30,
             right: 30,
-            child: Container(height: 10, color: const Color(0xFF3d2b1f)),
+            child: Container(height: 10, color: AppColors.illustrationDesk),
           ),
           Positioned(
             bottom: 8,
             left: 90,
             child: _PixelFigure(
-              headColor: const Color(0xFFe8c99a),
-              bodyColor: const Color(0xFF3fb950),
+              headColor: AppColors.illustrationSkin,
+              bodyColor: AppColors.accentGreen,
               posture: 'sitting',
             ),
           ),
@@ -566,7 +603,7 @@ class _ClassScene extends StatelessWidget {
             child: Container(
               width: 28,
               height: 20,
-              color: const Color(0xFFffa657).withValues(alpha: 0.8),
+              color: AppColors.illustrationWarm.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -581,7 +618,7 @@ class _SmallDesk extends StatelessWidget {
     return Container(
       width: 40,
       height: 8,
-      color: const Color(0xFF3d2b1f).withValues(alpha: 0.7),
+      color: AppColors.illustrationDesk.withValues(alpha: 0.7),
     );
   }
 }
@@ -599,28 +636,43 @@ class _EveningScene extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF050c1a), Color(0xFF1a1030)],
+                colors: [
+                  AppColors.illustrationDeepSky,
+                  AppColors.illustrationSkyEnd,
+                ],
               ),
             ),
           ),
           Positioned(
             top: 10,
             left: 30,
-            child: Container(width: 2, height: 2, color: Colors.white54),
+            child: Container(
+              width: 2,
+              height: 2,
+              color: AppColors.illustrationStar.withValues(alpha: 0.54),
+            ),
           ),
           Positioned(
             top: 25,
             left: 80,
-            child: Container(width: 1, height: 1, color: Colors.white54),
+            child: Container(
+              width: 1,
+              height: 1,
+              color: AppColors.illustrationStar.withValues(alpha: 0.54),
+            ),
           ),
           Positioned(
             top: 15,
             right: 50,
-            child: Container(width: 2, height: 2, color: Colors.white54),
+            child: Container(
+              width: 2,
+              height: 2,
+              color: AppColors.illustrationStar.withValues(alpha: 0.54),
+            ),
           ),
           // Lamp glow
           Positioned(
@@ -632,8 +684,8 @@ class _EveningScene extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFFffa040).withValues(alpha: 0.3),
-                    Colors.transparent,
+                    AppColors.illustrationWarm.withValues(alpha: 0.3),
+                    AppColors.transparent,
                   ],
                 ),
               ),
@@ -648,9 +700,13 @@ class _EveningScene extends StatelessWidget {
                 Container(
                   width: 24,
                   height: 12,
-                  color: const Color(0xFFffd54f).withValues(alpha: 0.8),
+                  color: AppColors.illustrationWindow.withValues(alpha: 0.8),
                 ),
-                Container(width: 4, height: 20, color: const Color(0xFF5a4a30)),
+                Container(
+                  width: 4,
+                  height: 20,
+                  color: AppColors.illustrationTrim,
+                ),
               ],
             ),
           ),
@@ -658,13 +714,16 @@ class _EveningScene extends StatelessWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(height: 20, color: const Color(0xFF2a1e12)),
+            child: Container(
+              height: 20,
+              color: AppColors.illustrationEveningGround,
+            ),
           ),
           Positioned(
             bottom: 20,
             left: 0,
             right: 0,
-            child: Container(height: 4, color: const Color(0xFF3d2b1f)),
+            child: Container(height: 4, color: AppColors.illustrationDesk),
           ),
           Positioned(
             bottom: 24,
@@ -674,12 +733,12 @@ class _EveningScene extends StatelessWidget {
                 Container(
                   width: 8,
                   height: 18,
-                  color: const Color(0xFFd29922).withValues(alpha: 0.8),
+                  color: AppColors.illustrationBook.withValues(alpha: 0.8),
                 ),
                 Container(
                   width: 8,
                   height: 14,
-                  color: const Color(0xFFf85149).withValues(alpha: 0.6),
+                  color: AppColors.accentRed.withValues(alpha: 0.6),
                 ),
               ],
             ),
@@ -688,8 +747,10 @@ class _EveningScene extends StatelessWidget {
             bottom: 20,
             left: 70,
             child: _PixelFigure(
-              headColor: const Color(0xFFe8c99a),
-              bodyColor: const Color(0xFF58a6ff).withValues(alpha: 0.6),
+              headColor: AppColors.illustrationSkin,
+              bodyColor: AppColors.illustrationScreenGlow.withValues(
+                alpha: 0.6,
+              ),
               posture: 'tired',
             ),
           ),
@@ -698,6 +759,318 @@ class _EveningScene extends StatelessWidget {
     );
   }
 }
+
+// ── Hallway scene ─────────────────────────────────────────────────────────────
+
+class _HallwayScene extends StatelessWidget {
+  final double height;
+
+  const _HallwayScene({required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Corridor background — cool gray-teal
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColors.surfaceVariant, AppColors.background],
+              ),
+            ),
+          ),
+          // Ceiling strip
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 30,
+              color: AppColors.border.withValues(alpha: 0.25),
+            ),
+          ),
+          // Fluorescent light fixtures on ceiling
+          Positioned(
+            top: 8,
+            left: 50,
+            right: 50,
+            child: Container(
+              height: 6,
+              decoration: BoxDecoration(
+                color: AppColors.illustrationWindow.withValues(alpha: 0.55),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.illustrationWindow.withValues(alpha: 0.2),
+                    blurRadius: 6,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Left locker bank
+          Positioned(
+            top: 30,
+            left: 0,
+            bottom: 30,
+            width: 48,
+            child: _LockerColumn(count: 5, color: AppColors.surfaceVariant),
+          ),
+          // Right locker bank
+          Positioned(
+            top: 30,
+            right: 0,
+            bottom: 30,
+            width: 48,
+            child: _LockerColumn(count: 5, color: AppColors.surfaceVariant),
+          ),
+          // Wall–floor seam
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Container(height: 2, color: AppColors.border),
+          ),
+          // Floor
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 30,
+              color: AppColors.illustrationDesk.withValues(alpha: 0.35),
+            ),
+          ),
+          // Floor center line
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            top: 30,
+            child: Center(
+              child: Container(
+                width: 2,
+                color: AppColors.border.withValues(alpha: 0.2),
+              ),
+            ),
+          ),
+          // Small pixel figure walking
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: _PixelFigure(
+                headColor: AppColors.illustrationSkin,
+                bodyColor: AppColors.accent.withValues(alpha: 0.55),
+                posture: 'sitting',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LockerColumn extends StatelessWidget {
+  final int count;
+  final Color color;
+
+  const _LockerColumn({required this.count, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: color,
+      child: Column(
+        children: List.generate(count, (i) {
+          return Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.border, width: 1),
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: 3,
+                  height: 3,
+                  margin: const EdgeInsets.only(left: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ── Lunch / cafeteria scene ───────────────────────────────────────────────────
+
+class _LunchScene extends StatelessWidget {
+  final double height;
+
+  const _LunchScene({required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Warm cafeteria background
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.illustrationBuilding,
+                  AppColors.illustrationDesk,
+                ],
+              ),
+            ),
+          ),
+          // Window on right — warm outdoor light
+          Positioned(
+            top: 16,
+            right: 20,
+            child: Container(
+              width: 44,
+              height: 56,
+              decoration: BoxDecoration(
+                color: AppColors.illustrationWarm.withValues(alpha: 0.25),
+                border: Border.all(color: AppColors.illustrationTrim, width: 2),
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      color: AppColors.illustrationWarm.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  Container(height: 2, color: AppColors.illustrationTrim),
+                  Expanded(
+                    child: Container(
+                      color: AppColors.illustrationWarm.withValues(alpha: 0.15),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Overhead cafeteria light
+          Positioned(
+            top: 8,
+            left: 40,
+            width: 60,
+            child: Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: AppColors.illustrationWindow.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+          // Floor
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 20,
+              color: AppColors.illustrationDesk.withValues(alpha: 0.8),
+            ),
+          ),
+          // Long cafeteria table surface
+          Positioned(
+            bottom: 44,
+            left: 16,
+            right: 80,
+            child: Container(height: 8, color: AppColors.illustrationDesk),
+          ),
+          // Bench/seat
+          Positioned(
+            bottom: 28,
+            left: 20,
+            width: 80,
+            child: Container(
+              height: 6,
+              color: AppColors.illustrationTrim.withValues(alpha: 0.7),
+            ),
+          ),
+          // Tray on table
+          Positioned(
+            bottom: 52,
+            left: 24,
+            child: Container(
+              width: 28,
+              height: 6,
+              color: AppColors.illustrationScreen.withValues(alpha: 0.6),
+            ),
+          ),
+          // Plate (circle approximated by square + decoration)
+          Positioned(
+            bottom: 55,
+            left: 30,
+            child: Container(
+              width: 14,
+              height: 10,
+              decoration: BoxDecoration(
+                color: AppColors.magnifierSurface,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+          // Food dot on plate
+          Positioned(
+            bottom: 58,
+            left: 36,
+            child: Container(
+              width: 4,
+              height: 4,
+              color: AppColors.accentAmber.withValues(alpha: 0.8),
+            ),
+          ),
+          // Drink carton
+          Positioned(
+            bottom: 52,
+            left: 60,
+            child: Container(
+              width: 8,
+              height: 14,
+              color: AppColors.accentPurple.withValues(alpha: 0.5),
+            ),
+          ),
+          // Seated figure at table
+          Positioned(
+            bottom: 44,
+            left: 28,
+            child: _PixelFigure(
+              headColor: AppColors.illustrationSkin,
+              bodyColor: AppColors.accentGreen.withValues(alpha: 0.7),
+              posture: 'sitting',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Pixel figure ───────────────────────────────────────────────────────────────
 
 class _PixelFigure extends StatelessWidget {
   final Color headColor;
@@ -715,7 +1088,7 @@ class _PixelFigure extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 16, height: 4, color: const Color(0xFF4a3728)),
+        Container(width: 16, height: 4, color: AppColors.illustrationHair),
         Container(
           width: 14,
           height: 14,
@@ -749,6 +1122,18 @@ class _StatusPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (gameState.selectedCharacter != null) ...[
+            Center(
+              child: CharacterPortrait(
+                character: gameState.selectedCharacter!,
+                width: 96,
+                height: 120,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Divider(color: AppColors.border, height: 1),
+            const SizedBox(height: 12),
+          ],
           BurnoutMeter(
             value: gameState.burnoutLevel,
             range: gameState.burnoutRange,
@@ -816,7 +1201,7 @@ class _StatusPanel extends StatelessWidget {
               'COMPLETED',
               style: TextStyle(
                 color: AppColors.textMuted,
-                fontSize: 9,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.2,
               ),
@@ -827,15 +1212,15 @@ class _StatusPanel extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.check, size: 11, color: AppColors.accentGreen),
+                    Icon(Icons.check, size: 12, color: AppColors.accentGreen),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         task,
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 11,
-                          height: 1.4,
+                          fontSize: 14,
+                          height: 1.45,
                         ),
                       ),
                     ),
@@ -844,6 +1229,117 @@ class _StatusPanel extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 16),
+          Divider(color: AppColors.border, height: 1),
+          const SizedBox(height: 10),
+          _MeterGlossary(),
+        ],
+      ),
+    );
+  }
+}
+
+class _MeterGlossary extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'WHAT DO THESE MEASURE?',
+          style: TextStyle(
+            color: AppColors.textMuted,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _MeterDef(
+          'Burnout',
+          'Computed from all meters. Rises when energy depletes, stress accumulates, or self-advocacy is suppressed.',
+          AppColors.burnoutMid,
+        ),
+        _MeterDef(
+          'Energy',
+          'Available capacity for demands. Drains with effort, restores with rest.',
+          AppColors.energyColor,
+        ),
+        _MeterDef(
+          'Stress',
+          'Accumulated tension. Lower is better. Rises with unresolved demands.',
+          AppColors.stressColor,
+        ),
+        _MeterDef(
+          'Focus',
+          'Ability to direct attention. Affected by sensory load and recovery.',
+          AppColors.focusColor,
+        ),
+        _MeterDef(
+          'Motivation',
+          'Drive to engage. Falls when tasks mismatch strengths.',
+          AppColors.motivationColor,
+        ),
+        _MeterDef(
+          'Life Satisfaction',
+          'Sense of meaning beyond immediate tasks.',
+          AppColors.satisfactionColor,
+        ),
+        _MeterDef(
+          'Self-Advocacy',
+          'Ability to name and communicate needs to others.',
+          AppColors.selfAdvocacyColor,
+        ),
+      ],
+    );
+  }
+}
+
+class _MeterDef extends StatelessWidget {
+  final String name;
+  final String definition;
+  final Color color;
+
+  const _MeterDef(this.name, this.definition, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            margin: const EdgeInsets.only(top: 3, right: 6),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$name: ',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      height: 1.45,
+                    ),
+                  ),
+                  TextSpan(
+                    text: definition,
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 13,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -880,7 +1376,7 @@ class _SensoryOverloadWarning extends StatelessWidget {
                 label.toUpperCase(),
                 style: TextStyle(
                   color: color,
-                  fontSize: 9,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.0,
                 ),
@@ -892,8 +1388,8 @@ class _SensoryOverloadWarning extends StatelessWidget {
             detail,
             style: TextStyle(
               color: AppColors.textSecondary,
-              fontSize: 10,
-              height: 1.4,
+              fontSize: 13,
+              height: 1.45,
             ),
           ),
         ],
@@ -987,21 +1483,29 @@ class _InteractionContent extends StatelessWidget {
     final idx = gameState.currentScenarioIndex;
     final scenario = scenarios[idx];
     final total = scenarios.length;
-
+    final progress = _ProgressIndicator(current: idx + 1, total: total);
     if (gameState.pendingFeedback != null) {
-      return EducationalFeedbackCard(
-        choiceLabel: gameState.lastChoiceLabel ?? '',
-        feedbackText: gameState.pendingFeedback!,
-        isLastScenario: idx + 1 >= total,
-        onContinue: () => gameState.advanceScenario(scenarios),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          progress,
+          const SizedBox(height: 16),
+          EducationalFeedbackCard(
+            choiceLabel: gameState.lastChoiceLabel ?? '',
+            feedbackText: gameState.pendingFeedback!,
+            isLastScenario: idx + 1 >= total,
+            onContinue: gameState.advanceScenario,
+          ),
+        ],
       );
     }
 
     final carryover = gameState.carryoverNote(scenario);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        progress,
+        const SizedBox(height: 16),
         if (carryover != null) _CarryoverNote(text: carryover),
         ScenarioCard(
           scenario: scenario,
@@ -1011,8 +1515,6 @@ class _InteractionContent extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _ChoiceList(gameState: gameState, scenario: scenario),
-        const SizedBox(height: 24),
-        _ProgressIndicator(current: idx + 1, total: total),
       ],
     );
   }
@@ -1026,8 +1528,7 @@ class _CarryoverNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: AppColors.accentPurple.withValues(alpha: 0.06),
         border: Border(
@@ -1037,18 +1538,36 @@ class _CarryoverNote extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.history, color: AppColors.accentPurple, size: 14),
-          const SizedBox(width: 8),
-          Expanded(
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            color: AppColors.accentPurple.withValues(alpha: 0.10),
+            child: Row(
+              children: [
+                Icon(Icons.history, color: AppColors.accentPurple, size: 11),
+                const SizedBox(width: 6),
+                Text(
+                  'AN EARLIER CHOICE IS STILL SHOWING',
+                  style: TextStyle(
+                    color: AppColors.accentPurple,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12),
             child: Text(
               text,
               style: TextStyle(
                 color: AppColors.textSecondary,
-                fontSize: 12,
-                height: 1.5,
+                fontSize: 14,
+                height: 1.55,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -1104,28 +1623,40 @@ class _ProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Scenario $current of $total',
-          style: TextStyle(
-            color: AppColors.textMuted,
-            fontSize: 11,
-            letterSpacing: 0.5,
-          ),
+    final label = Text(
+      'Scenario $current of $total',
+      style: TextStyle(
+        color: AppColors.textMuted,
+        fontSize: 14,
+        letterSpacing: 0.5,
+      ),
+    );
+    final steps = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        total,
+        (i) => Container(
+          width: 20,
+          height: 4,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          color: i < current ? AppColors.accent : AppColors.surfaceVariant,
         ),
-        const SizedBox(width: 12),
-        ...List.generate(
-          total,
-          (i) => Container(
-            width: 20,
-            height: 4,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            color: i < current ? AppColors.accent : AppColors.surfaceVariant,
-          ),
-        ),
-      ],
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 420) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [label, const SizedBox(height: 8), steps],
+          );
+        }
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [label, const SizedBox(width: 12), steps],
+        );
+      },
     );
   }
 }
@@ -1147,10 +1678,10 @@ class _BurnoutOverlay extends StatelessWidget {
         child: Stack(
           children: [
             Container(
-              color: const Color(0xFFd29922).withValues(alpha: baseOpacity),
+              color: AppColors.illustrationBook.withValues(alpha: baseOpacity),
             ),
             if (severe)
-              Container(color: const Color(0xFFf85149).withValues(alpha: 0.06)),
+              Container(color: AppColors.accentRed.withValues(alpha: 0.06)),
           ],
         ),
       ),

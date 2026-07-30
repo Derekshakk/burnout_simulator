@@ -41,30 +41,38 @@ class StatusMeter extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  label.toUpperCase(),
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.0,
+                Expanded(
+                  child: Text(
+                    label.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.0,
+                    ),
                   ),
                 ),
-                Text(
-                  '${value.round()}',
-                  style: TextStyle(
-                    color: effectiveColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 6),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '${value.round()}',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             SizedBox(
-              height: 6,
+              height: 7,
               child: ClipRect(
                 child: Stack(
                   children: [
@@ -122,7 +130,7 @@ class BurnoutMeter extends StatelessWidget {
                 'BURNOUT',
                 style: TextStyle(
                   color: AppColors.textSecondary,
-                  fontSize: 10,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 1.0,
                 ),
@@ -133,8 +141,8 @@ class BurnoutMeter extends StatelessWidget {
                 child: Text(
                   _rangeLabel(),
                   style: TextStyle(
-                    color: color,
-                    fontSize: 9,
+                    color: AppColors.textPrimary,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.0,
                   ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import '../app/theme.dart';
 import 'package:flutter/rendering.dart';
 
 /// Floating text magnifier that captures a screenshot region beneath the cursor
@@ -152,16 +153,16 @@ class _MagnifierBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
+        color: AppColors.magnifierSurface,
         borderRadius: BorderRadius.circular(4),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x44000000),
+            color: AppColors.overlayScrim.withValues(alpha: 0.27),
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
         ],
-        border: Border.all(color: const Color(0xFFCCCCCC), width: 1),
+        border: Border.all(color: AppColors.magnifierBorder, width: 1),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(3),
@@ -221,7 +222,7 @@ class _MagnifierPainter extends CustomPainter {
     final dst = Rect.fromLTWH(0, 0, size.width, size.height);
 
     // White background first (ensures light bg even over dark page areas)
-    canvas.drawRect(dst, Paint()..color = const Color(0xFFF8F8F8));
+    canvas.drawRect(dst, Paint()..color = AppColors.magnifierSurface);
     canvas.drawImageRect(
       image,
       src,
