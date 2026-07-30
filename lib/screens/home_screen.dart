@@ -409,7 +409,7 @@ class _FeatureGrid extends StatelessWidget {
       ),
       _FeatureItem(
         icon: Icons.people_outline,
-        title: 'Two characters to explore',
+        title: 'Three characters to explore',
         description:
             'Choose from fictional students with distinct strengths, triggers, and recovery strategies that shape the day differently.',
       ),
