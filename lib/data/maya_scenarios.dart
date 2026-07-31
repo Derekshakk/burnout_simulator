@@ -1,13 +1,16 @@
 import '../models/game_choice.dart';
 import '../models/game_scenario.dart';
+import '../models/scene_artwork.dart';
 
 const List<GameScenario> mayaScenarios = [
   GameScenario(
     id: 'maya_schedule_change',
+    characterId: 'maya',
     title: 'A Changed Plan',
     timeLabel: '8:30 AM',
     sceneTone: 'morning',
-    sceneImagePath: 'assets/stories/time_Awareness.jpg',
+    sceneType: 'time_awareness',
+    sceneArtwork: SceneArtworks.timeAwareness,
     sceneSemanticLabel:
         'Illustration representing an unexpected schedule change and time planning',
     description:
@@ -62,10 +65,12 @@ const List<GameScenario> mayaScenarios = [
   ),
   GameScenario(
     id: 'maya_online_class',
+    characterId: 'maya',
     title: 'Too Many Signals',
     timeLabel: '9:00 AM',
     sceneTone: 'class',
-    sceneImagePath: 'assets/stories/bedroom_background.jpg',
+    sceneType: 'home',
+    sceneArtwork: SceneArtworks.bedroomBackground,
     sceneSemanticLabel:
         'Illustration of a home workspace during an online class session',
     carryoverNotes: {
@@ -128,10 +133,12 @@ const List<GameScenario> mayaScenarios = [
   //       maya_protected_focus. Sets: maya_socially_drained · maya_quiet_reset.
   GameScenario(
     id: 'maya_critique',
+    characterId: 'maya',
     title: 'Project Critique',
     timeLabel: '1:00 PM',
     sceneTone: 'class',
-    sceneImagePath: 'assets/stories/maya_disclosing_to_teacher.jpg',
+    sceneType: 'classroom',
+    sceneArtwork: SceneArtworks.mayaDisclosingToTeacher,
     sceneSemanticLabel:
         'Illustration of Maya speaking with an instructor during a project critique',
     carryoverNotes: {

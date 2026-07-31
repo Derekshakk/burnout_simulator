@@ -1,14 +1,17 @@
 import '../models/game_scenario.dart';
 import '../models/game_choice.dart';
+import '../models/scene_artwork.dart';
 
 const List<GameScenario> alexScenarios = [
   // S1 — Morning Planning (unchanged)
   GameScenario(
     id: 'morning_planning',
+    characterId: 'alex',
     title: 'Morning Planning',
     timeLabel: '8:00 AM',
     sceneTone: 'morning',
-    sceneImagePath: 'assets/stories/alex_productive.jpg',
+    sceneType: 'home',
+    sceneArtwork: SceneArtworks.alexProductive,
     sceneSemanticLabel: 'Illustration of Alex planning their day at a desk',
     description:
         'Alex sits at the kitchen table and opens a notebook to find a long list of assignments, a group project due this week, and two after-school commitments. The list stretches across two pages.',
@@ -61,10 +64,12 @@ const List<GameScenario> alexScenarios = [
   // S2 — Morning Hallways (unchanged)
   GameScenario(
     id: 'sensory_hallway',
+    characterId: 'alex',
     title: 'Morning Hallways',
     timeLabel: '9:30 AM',
     sceneTone: 'hallway',
-    sceneImagePath: 'assets/stories/hallway_background.jpg',
+    sceneType: 'hallway',
+    sceneArtwork: SceneArtworks.hallwayBackground,
     sceneSemanticLabel: 'Illustration of a busy school hallway between classes',
     carryoverNotes: {
       'chaotic_morning':
@@ -120,10 +125,11 @@ const List<GameScenario> alexScenarios = [
   // S3 — Group Project Start (replaces class_project; integrates Restlessness + Looking Productive notes)
   GameScenario(
     id: 'class_restlessness',
+    characterId: 'alex',
     title: 'Group Project Start',
     timeLabel: '10:00 AM',
     sceneTone: 'class',
-    sceneImagePath: 'assets/stories/jordan_classroom.jpg',
+    sceneType: 'classroom',
     sceneSemanticLabel: 'Illustration of a classroom during a group project',
     carryoverNotes: {
       'chaotic_morning':
@@ -208,11 +214,13 @@ const List<GameScenario> alexScenarios = [
   // S5 — Final School Hour (revised: integrates Time Awareness note; adds reprioritize + timer choices)
   GameScenario(
     id: 'end_of_day',
+    characterId: 'alex',
     title: 'Final School Hour',
     timeLabel: '2:00 PM',
     endTimeLabel: '3:00 PM',
     sceneTone: 'evening',
-    sceneImagePath: 'assets/stories/time_Awareness.jpg',
+    sceneType: 'time_awareness',
+    sceneArtwork: SceneArtworks.timeAwareness,
     sceneSemanticLabel:
         'Illustration representing time awareness at the end of the school day',
     carryoverNotes: {

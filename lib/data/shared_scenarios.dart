@@ -1,6 +1,7 @@
 import '../models/character_profile.dart';
 import '../models/game_scenario.dart';
 import '../models/game_choice.dart';
+import '../models/scene_artwork.dart';
 
 // ──────────────────────────────────────────────────────────────────────────────
 // SHARED SCENARIO A: Lunch Break
@@ -17,16 +18,18 @@ import '../models/game_choice.dart';
 //           consumed by maya_critique.
 // ──────────────────────────────────────────────────────────────────────────────
 GameScenario buildLunchBreakScenario(CharacterProfile character) =>
-    character.id == 'alex'
-    ? _alexLunchBreak(character)
-    : _mayaLunchBreak(character);
+    character.id == 'maya'
+    ? _mayaLunchBreak(character)
+    : _alexLunchBreak(character);
 
 GameScenario _alexLunchBreak(CharacterProfile c) => GameScenario(
   id: 'shared_lunch_break',
+  characterId: c.id,
   title: 'Lunch Break',
   timeLabel: '11:30 AM',
   sceneTone: 'lunch',
-  sceneImagePath: 'assets/stories/cafeteria_background.jpg',
+  sceneType: 'cafeteria',
+  sceneArtwork: SceneArtworks.cafeteriaBackground,
   sceneSemanticLabel: 'Illustration of a school cafeteria at lunchtime',
   carryoverNotes: {
     'pushed_sensory':
@@ -104,10 +107,12 @@ GameScenario _alexLunchBreak(CharacterProfile c) => GameScenario(
 
 GameScenario _mayaLunchBreak(CharacterProfile c) => GameScenario(
   id: 'shared_lunch_break',
+  characterId: c.id,
   title: 'The Between-Class Gap',
   timeLabel: '11:00 AM',
   sceneTone: 'lunch',
-  sceneImagePath: 'assets/stories/maya_cafe_group.jpg',
+  sceneType: 'cafeteria',
+  sceneArtwork: SceneArtworks.mayaCafeGroup,
   sceneSemanticLabel:
       'Illustration of Maya with a group in a café or student center',
   carryoverNotes: {
@@ -184,19 +189,22 @@ GameScenario _mayaLunchBreak(CharacterProfile c) => GameScenario(
 // ──────────────────────────────────────────────────────────────────────────────
 GameScenario buildAccommodationsScenario(CharacterProfile character) {
   final bool isCollege = character.context.toLowerCase().contains('college');
+  final bool isJordan = character.id == 'jordan';
 
   return GameScenario(
     id: 'shared_accommodations',
+    characterId: character.id,
     title: 'Finding Support',
     timeLabel: isCollege ? '2:30 PM' : '2:00 PM',
     endTimeLabel: '3:00 PM',
     sceneTone: 'evening',
-    sceneImagePath: isCollege
-        ? 'assets/stories/bedroom_background.jpg'
-        : 'assets/stories/jordan_bedroom_recovery.jpg',
-    sceneSemanticLabel: isCollege
-        ? 'Illustration of a quiet space at the end of the day'
-        : 'Illustration of Jordan at home after a long school day',
+    sceneType: 'home',
+    sceneArtwork: isJordan
+        ? SceneArtworks.jordanBedroomRecovery
+        : SceneArtworks.bedroomBackground,
+    sceneSemanticLabel: isJordan
+        ? 'Illustration of Jordan at home after a long school day'
+        : 'Illustration of a quiet space at the end of the day',
     carryoverNotes: _accommodationsCarryover(isCollege),
     description: isCollege
         ? 'The disability services office is open until 5 PM. ${character.name} has been aware it exists since orientation but has not completed the intake process. In college, there is no automatic continuation from a school IEP — accessing accommodations requires self-initiation.'

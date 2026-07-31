@@ -1,14 +1,17 @@
 import '../models/game_scenario.dart';
 import '../models/game_choice.dart';
+import '../models/scene_artwork.dart';
 
 const List<GameScenario> jordanScenarios = [
   // S1 — Room Change (unchanged)
   GameScenario(
     id: 'routine_disruption',
+    characterId: 'jordan',
     title: 'Room Change',
     timeLabel: '8:30 AM',
     sceneTone: 'morning',
-    sceneImagePath: 'assets/stories/jordan_hallway.jpg',
+    sceneType: 'hallway',
+    sceneArtwork: SceneArtworks.jordanHallway,
     sceneSemanticLabel:
         'Illustration of Jordan in a school hallway facing an unexpected room change',
     description:
@@ -65,10 +68,12 @@ const List<GameScenario> jordanScenarios = [
   // S2 — Unstructured Group Work (fixed: time 9:00 AM; carryover added for S1 positive paths)
   GameScenario(
     id: 'group_work_ambiguous',
+    characterId: 'jordan',
     title: 'Unstructured Group Work',
     timeLabel: '9:00 AM',
     sceneTone: 'class',
-    sceneImagePath: 'assets/stories/jordan_classroom.jpg',
+    sceneType: 'classroom',
+    sceneArtwork: SceneArtworks.jordanClassroom,
     sceneSemanticLabel:
         'Illustration of Jordan during unstructured group work in the classroom',
     carryoverNotes: {
@@ -153,10 +158,12 @@ const List<GameScenario> jordanScenarios = [
   // S3 — Lunch Table (replaces cafeteria_sensory; integrates Conversation note; consumes S2 tags)
   GameScenario(
     id: 'lunch_conversation',
+    characterId: 'jordan',
     title: 'Lunch Table',
     timeLabel: '11:30 AM',
     sceneTone: 'lunch',
-    sceneImagePath: 'assets/stories/jordan_cafeteria_conversation.jpg',
+    sceneType: 'cafeteria',
+    sceneArtwork: SceneArtworks.jordanCafeteriaConversation,
     sceneSemanticLabel:
         'Illustration of Jordan having a conversation in the school cafeteria',
     carryoverNotes: {
@@ -236,10 +243,12 @@ const List<GameScenario> jordanScenarios = [
   // S4 — Classroom Overload (replaces ambiguous_feedback; integrates Classroom Sensory Overload note; consumes S3 tags)
   GameScenario(
     id: 'classroom_sensory_overload',
+    characterId: 'jordan',
     title: 'Classroom Overload',
     timeLabel: '1:00 PM',
     sceneTone: 'class',
-    sceneImagePath: 'assets/stories/jordan_classroom.jpg',
+    sceneType: 'classroom',
+    sceneArtwork: SceneArtworks.jordanClassroom,
     sceneSemanticLabel:
         'Illustration of Jordan in a classroom with sensory overload from lights and sounds',
     carryoverNotes: {

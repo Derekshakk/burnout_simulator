@@ -125,6 +125,16 @@ class GameState extends ChangeNotifier {
     if (scenarios.isEmpty) {
       throw ArgumentError.value(scenarios, 'scenarios', 'Must not be empty');
     }
+    final invalidScenario = scenarios.where(
+      (scenario) => !scenario.isValidForCharacter(character.id),
+    );
+    if (invalidScenario.isNotEmpty) {
+      throw ArgumentError.value(
+        invalidScenario.first.id,
+        'scenarios',
+        'Scenario artwork must belong to the selected character or be shared.',
+      );
+    }
     _selectedCharacter = character;
     _activeScenarios = List.unmodifiable(scenarios);
     _resetProgress();

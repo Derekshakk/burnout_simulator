@@ -4,6 +4,7 @@ import '../app/session_navigation.dart';
 import '../app/theme.dart';
 import '../models/game_scenario.dart';
 import '../models/game_state.dart';
+import '../models/scene_artwork.dart';
 import '../widgets/character_portrait.dart';
 import '../widgets/choice_button.dart';
 import '../widgets/educational_feedback_card.dart';
@@ -261,7 +262,9 @@ class _ScenePanel extends StatelessWidget {
         semanticLabel: semanticLabel,
         child: _SceneArtwork(
           sceneTone: scenario.sceneTone,
-          sceneImagePath: scenario.sceneImagePath,
+          sceneType: scenario.sceneType,
+          preferredArtwork: scenario.sceneArtwork,
+          selectedCharacterId: gameState.selectedCharacter!.id,
           burnoutLevel: gameState.burnoutLevel,
           reduceEffects: gameState.reduceVisualEffects,
           hasSensoryOverload: gameState.hasSensoryOverload,
@@ -274,7 +277,9 @@ class _ScenePanel extends StatelessWidget {
 
 class _SceneArtwork extends StatelessWidget {
   final String sceneTone;
-  final String? sceneImagePath;
+  final String sceneType;
+  final SceneArtwork? preferredArtwork;
+  final String selectedCharacterId;
   final double burnoutLevel;
   final bool reduceEffects;
   final bool hasSensoryOverload;
@@ -282,7 +287,9 @@ class _SceneArtwork extends StatelessWidget {
 
   const _SceneArtwork({
     required this.sceneTone,
-    this.sceneImagePath,
+    required this.sceneType,
+    this.preferredArtwork,
+    required this.selectedCharacterId,
     required this.burnoutLevel,
     required this.reduceEffects,
     required this.hasSensoryOverload,
@@ -291,28 +298,13 @@ class _SceneArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget artwork;
-
-    if (sceneImagePath != null) {
-      artwork = Image.asset(
-        sceneImagePath!,
-        fit: BoxFit.cover,
-        alignment: Alignment.center,
-      );
-    } else {
-      switch (sceneTone) {
-        case 'morning':
-          artwork = _MorningScene(height: height);
-        case 'hallway':
-          artwork = _HallwayScene(height: height);
-        case 'lunch':
-          artwork = _LunchScene(height: height);
-        case 'class':
-          artwork = _ClassScene(height: height);
-        default:
-          artwork = _EveningScene(height: height);
-      }
-    }
+    final artwork = _assetOrFallback(
+      SceneArtworkResolver.assetCandidates(
+        preferredArtwork: preferredArtwork,
+        selectedCharacterId: selectedCharacterId,
+        sceneType: sceneType,
+      ),
+    );
 
     if (reduceEffects || burnoutLevel < 40) {
       return SizedBox(height: height, child: artwork);
@@ -339,6 +331,47 @@ class _SceneArtwork extends StatelessWidget {
       ),
     );
   }
+
+  Widget _assetOrFallback(List<String> assetPaths, [int index = 0]) {
+    if (index >= assetPaths.length) return _pixelOrNeutralPlaceholder();
+    return Image.asset(
+      assetPaths[index],
+      fit: BoxFit.cover,
+      alignment: Alignment.center,
+      errorBuilder: (_, _, _) => _assetOrFallback(assetPaths, index + 1),
+    );
+  }
+
+  Widget _pixelOrNeutralPlaceholder() {
+    switch (sceneTone) {
+      case 'morning':
+        return _MorningScene(height: height);
+      case 'hallway':
+        return _HallwayScene(height: height);
+      case 'lunch':
+        return _LunchScene(height: height);
+      case 'class':
+        return _ClassScene(height: height);
+      case 'evening':
+        return _EveningScene(height: height);
+      default:
+        return const _NeutralScenePlaceholder();
+    }
+  }
+}
+
+class _NeutralScenePlaceholder extends StatelessWidget {
+  const _NeutralScenePlaceholder();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    color: AppColors.surface,
+    alignment: Alignment.center,
+    child: Icon(
+      Icons.image_not_supported_outlined,
+      color: AppColors.textSecondary,
+    ),
+  );
 }
 
 class _BrainFogBadge extends StatelessWidget {
