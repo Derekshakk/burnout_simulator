@@ -242,7 +242,7 @@ class _DisclaimerSection extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'This prototype is an educational tool. It is not a clinical assessment, diagnostic tool, or substitute for mental health support.',
+                      'This game is an educational tool. It is not a clinical assessment, diagnostic tool, or substitute for mental health support.',
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 16,
@@ -318,7 +318,7 @@ class _PageFooter extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Project Ignite — Educational Prototype for SNP-REACH 2026',
+                  'Project Ignite — Educational Game for SNP-REACH 2026',
                   style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
                 const SizedBox(height: 4),
@@ -333,7 +333,7 @@ class _PageFooter extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'Project Ignite — Educational Prototype for SNP-REACH 2026',
+                    'Project Ignite — Educational Game for SNP-REACH 2026',
                     style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ),

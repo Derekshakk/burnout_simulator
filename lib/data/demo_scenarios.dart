@@ -1,5 +1,5 @@
 // ARCHIVED — not wired to any character or route.
-// These three scenarios were the original prototype before per-character
+// These three scenarios were the original game before per-character
 // scenario files (alex_scenarios.dart, jordan_scenarios.dart,
 // maya_scenarios.dart) were introduced. Kept for reference only.
 // Do not import or use demoScenarios in new code.

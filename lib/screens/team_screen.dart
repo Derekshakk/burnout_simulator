@@ -82,7 +82,7 @@ class _PageHeader extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: ReadingText(
-              'Project Ignite is a student-built prototype developed for SNP-REACH 2026.',
+              'Project Ignite is a student-built game developed for SNP-REACH 2026.',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 17,
@@ -292,7 +292,7 @@ class _PageFooter extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Project Ignite — Educational Prototype for SNP-REACH 2026',
+                  'Project Ignite — Educational Game for SNP-REACH 2026',
                   style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
                 const SizedBox(height: 4),
@@ -307,7 +307,7 @@ class _PageFooter extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'Project Ignite — Educational Prototype for SNP-REACH 2026',
+                    'Project Ignite — Educational Game for SNP-REACH 2026',
                     style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ),

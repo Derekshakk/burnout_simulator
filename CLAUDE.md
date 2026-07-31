@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Educational Flutter web simulation about neurodivergent (ADHD/autism) burnout. Prototype for SNP-REACH 2026. Primary target is **Flutter web**; secondary targets are mobile and desktop.
+Educational Flutter web simulation about neurodivergent (ADHD/autism) burnout. Game for SNP-REACH 2026. Primary target is **Flutter web**; secondary targets are mobile and desktop.
 
 ## Commands
 

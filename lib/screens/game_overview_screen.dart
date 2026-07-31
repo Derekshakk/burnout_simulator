@@ -539,7 +539,7 @@ class _PlayCTA extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'The prototype takes about 5–10 minutes.',
+            'The game takes about 5–10 minutes.',
             style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
             textAlign: TextAlign.center,
           ),

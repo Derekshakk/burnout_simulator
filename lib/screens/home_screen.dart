@@ -558,7 +558,7 @@ class _ExplorePreviewSection extends StatelessWidget {
                   icon: Icons.people_outline,
                   title: 'Meet the Team',
                   body:
-                      'Project Ignite is a student-built prototype developed for SNP-REACH 2026. Meet the people behind the project.',
+                      'Project Ignite is a student-built game developed for SNP-REACH 2026. Meet the people behind the project.',
                   buttonLabel: 'Meet the Team',
                   onTap: () => Navigator.pushNamed(context, AppRoutes.team),
                 ),
@@ -586,7 +586,7 @@ class _ExplorePreviewSection extends StatelessWidget {
                       icon: Icons.people_outline,
                       title: 'Meet the Team',
                       body:
-                          'Project Ignite is a student-built prototype developed for SNP-REACH 2026. Meet the people behind the project.',
+                          'Project Ignite is a student-built game developed for SNP-REACH 2026. Meet the people behind the project.',
                       buttonLabel: 'Meet the Team',
                       onTap: () => Navigator.pushNamed(context, AppRoutes.team),
                     ),
@@ -1000,7 +1000,7 @@ class _ResourcesSection extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Educational Prototype — Not Medical Advice',
+                        'Educational Game — Not Medical Advice',
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 16,
@@ -1012,7 +1012,7 @@ class _ResourcesSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'This prototype is an educational simulation intended for learning and discussion. It is not medical or mental health treatment, and does not replace professional support. If you or someone you know is experiencing burnout, please reach out to a trusted adult, school counselor, or mental health professional.',
+                  'This game is an educational simulation intended for learning and discussion. It is not medical or mental health treatment, and does not replace professional support. If you or someone you know is experiencing burnout, please reach out to a trusted adult, school counselor, or mental health professional.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 16,
@@ -1021,7 +1021,7 @@ class _ResourcesSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'The characters and scenarios in this prototype are fictional and created solely for educational purposes. They do not represent any real individuals or the full range of neurodivergent experiences.',
+                  'The characters and scenarios in this game are fictional and created solely for educational purposes. They do not represent any real individuals or the full range of neurodivergent experiences.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 16,
@@ -1055,7 +1055,7 @@ class _Footer extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Project Ignite — Educational Prototype for SNP-REACH 2026',
+                  'Project Ignite — Educational Game for SNP-REACH 2026',
                   style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
                 const SizedBox(height: 4),
@@ -1070,7 +1070,7 @@ class _Footer extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'Project Ignite — Educational Prototype for SNP-REACH 2026',
+                    'Project Ignite — Educational Game for SNP-REACH 2026',
                     style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   ),
                 ),
