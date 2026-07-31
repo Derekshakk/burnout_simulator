@@ -46,6 +46,11 @@ void main() {
       '${registration.profile.name} explicit time-to-next-class copy matches the schedule',
       () => _expectExplicitScheduleCopyToMatch(registration),
     );
+
+    test(
+      '${registration.profile.name} always has a playable choice on every reachable path',
+      () => _expectEveryReachablePathCanFinish(registration),
+    );
   }
 }
 
@@ -108,6 +113,46 @@ void _expectExplicitScheduleCopyToMatch(RegisteredCharacter registration) {
           '${registration.profile.name}: ${scenario.id} says $claimedMinutes minutes until the next class, but the schedule shows $scheduledMinutes.',
     );
   }
+}
+
+void _expectEveryReachablePathCanFinish(RegisteredCharacter registration) {
+  void visit(List<int> path) {
+    final gameState = GameState();
+    gameState.selectCharacter(registration.profile, registration.scenarios);
+
+    for (final choiceIndex in path) {
+      final scenario =
+          gameState.activeScenarios[gameState.currentScenarioIndex];
+      final choice = scenario.choices[choiceIndex];
+      expect(
+        gameState.isChoiceAvailable(choice),
+        isTrue,
+        reason:
+            '${registration.profile.name} path $path includes an unavailable choice in ${scenario.id}.',
+      );
+      gameState.applyChoice(choice);
+      gameState.advanceScenario();
+    }
+
+    if (gameState.hasCompletedGame) return;
+
+    final scenario = gameState.activeScenarios[gameState.currentScenarioIndex];
+    final availableChoices = <int>[
+      for (var index = 0; index < scenario.choices.length; index++)
+        if (gameState.isChoiceAvailable(scenario.choices[index])) index,
+    ];
+    expect(
+      availableChoices,
+      isNotEmpty,
+      reason:
+          '${registration.profile.name} has no available choice in ${scenario.id} after path $path.',
+    );
+    for (final choiceIndex in availableChoices) {
+      visit([...path, choiceIndex]);
+    }
+  }
+
+  visit(const []);
 }
 
 int _minutesFromTimeLabel(String label) {

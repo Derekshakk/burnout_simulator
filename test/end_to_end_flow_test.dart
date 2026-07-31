@@ -56,6 +56,7 @@ void main() {
           find.text('${registration.profile.name}\'s Day is Complete'),
           findsOneWidget,
         );
+        expect(find.text('Share Feedback or Suggestions'), findsOneWidget);
 
         final replayButton = find.widgetWithText(
           ElevatedButton,

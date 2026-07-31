@@ -654,7 +654,7 @@ class _ExploreCard extends StatelessWidget {
   }
 }
 
-// ── Contact ───────────────────────────────────────────────────────────────────
+// ── Contact / Feedback ────────────────────────────────────────────────────────
 
 class _ContactSection extends StatefulWidget {
   final bool isMobile;
@@ -765,7 +765,7 @@ class _ContactSectionState extends State<_ContactSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionLabel(text: 'CONTACT US'),
+          const SectionLabel(text: 'CONTACT / FEEDBACK'),
           const SizedBox(height: 20),
           A11yHeading(
             'Get in touch',
@@ -783,6 +783,27 @@ class _ContactSectionState extends State<_ContactSection> {
                     color: AppColors.textSecondary,
                     fontSize: 16,
                     height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () => launchUrl(
+                    Uri.parse(
+                      'https://docs.google.com/forms/d/e/1FAIpQLSdZmyoQbHN0IGxx88vrCH0ALPOFCm87SCXcuIvFDKWYem1UDA/viewform?usp=header',
+                    ),
+                    mode: LaunchMode.externalApplication,
+                  ),
+                  icon: const Icon(Icons.feedback_outlined, size: 16),
+                  label: const Text('Share Feedback or Suggestions'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.accent,
+                    side: BorderSide(
+                      color: AppColors.accent.withValues(alpha: 0.5),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

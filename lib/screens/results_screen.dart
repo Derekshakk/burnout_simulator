@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
@@ -1507,6 +1508,22 @@ class _PlayAgainPanel extends StatelessWidget {
               foregroundColor: AppColors.textSecondary,
             ),
             child: const Text('Return to Home'),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: () => launchUrl(
+              Uri.parse(
+                'https://docs.google.com/forms/d/e/1FAIpQLSdZmyoQbHN0IGxx88vrCH0ALPOFCm87SCXcuIvFDKWYem1UDA/viewform?usp=header',
+              ),
+              mode: LaunchMode.externalApplication,
+            ),
+            icon: const Icon(Icons.feedback_outlined, size: 16),
+            label: const Text('Share Feedback or Suggestions'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              side: BorderSide(color: AppColors.accent.withValues(alpha: 0.5)),
+              foregroundColor: AppColors.accent,
+            ),
           ),
           const SizedBox(height: 12),
           Text(

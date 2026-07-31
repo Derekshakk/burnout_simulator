@@ -12,7 +12,7 @@ void main() {
     (route: AppRoutes.about, expectedText: 'ABOUT THE GAME'),
     (route: AppRoutes.select, expectedText: 'CHOOSE YOUR CHARACTER'),
     (route: AppRoutes.team, expectedText: 'MEET THE TEAM'),
-    (route: AppRoutes.contact, expectedText: 'CONTACT US'),
+    (route: AppRoutes.contact, expectedText: 'CONTACT / FEEDBACK'),
   ]) {
     testWidgets('direct ${entry.route} opens its public page', (tester) async {
       tester.binding.platformDispatcher.defaultRouteNameTestValue = entry.route;
@@ -24,6 +24,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(entry.expectedText), findsOneWidget);
+      if (entry.route == AppRoutes.contact) {
+        expect(find.text('Share Feedback or Suggestions'), findsOneWidget);
+      }
       expect(
         Navigator.of(tester.element(find.text(entry.expectedText))).canPop(),
         isFalse,
