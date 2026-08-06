@@ -11,7 +11,7 @@ const _episodes = [
   (
     title: 'A Conversation With Charlotte',
     youtubeId: '88TJ-HQA_qk',
-    startSeconds: 36,
+    watchUrl: 'https://youtu.be/88TJ-HQA_qk?si=q-zWk6W--GXo0qV-',
   ),
 ];
 
@@ -107,15 +107,17 @@ class _PodcastsBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: _episodes
-            .map((ep) => Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
-                  child: _EpisodeCard(
-                    title: ep.title,
-                    youtubeId: ep.youtubeId,
-                    startSeconds: ep.startSeconds,
-                    isMobile: isMobile,
-                  ),
-                ))
+            .map(
+              (ep) => Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: _EpisodeCard(
+                  title: ep.title,
+                  youtubeId: ep.youtubeId,
+                  watchUrl: ep.watchUrl,
+                  isMobile: isMobile,
+                ),
+              ),
+            )
             .toList(),
       ),
     );
@@ -125,13 +127,13 @@ class _PodcastsBody extends StatelessWidget {
 class _EpisodeCard extends StatefulWidget {
   final String title;
   final String youtubeId;
-  final int startSeconds;
+  final String watchUrl;
   final bool isMobile;
 
   const _EpisodeCard({
     required this.title,
     required this.youtubeId,
-    required this.startSeconds,
+    required this.watchUrl,
     required this.isMobile,
   });
 
@@ -145,14 +147,11 @@ class _EpisodeCardState extends State<_EpisodeCard> {
   String get _thumbnailUrl =>
       'https://img.youtube.com/vi/${widget.youtubeId}/maxresdefault.jpg';
 
-  String get _watchUrl =>
-      'https://www.youtube.com/watch?v=${widget.youtubeId}&t=${widget.startSeconds}s';
-
   Future<void> _open() async {
-    final uri = Uri.parse(_watchUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.platformDefault);
-    }
+    await launchUrl(
+      Uri.parse(widget.watchUrl),
+      mode: LaunchMode.platformDefault,
+    );
   }
 
   @override
@@ -189,7 +188,9 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                       onHover: (v) => setState(() => _hovered = v),
                     ),
                   ),
-                  Expanded(child: _EpisodeInfo(title: widget.title, onWatch: _open)),
+                  Expanded(
+                    child: _EpisodeInfo(title: widget.title, onWatch: _open),
+                  ),
                 ],
               ),
       ),
@@ -281,8 +282,11 @@ class _EpisodeInfo extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.smart_display_outlined,
-                  color: AppColors.accentRed, size: 16),
+              Icon(
+                Icons.smart_display_outlined,
+                color: AppColors.accentRed,
+                size: 16,
+              ),
               const SizedBox(width: 6),
               Text(
                 'YouTube',
