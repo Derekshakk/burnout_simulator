@@ -11,6 +11,7 @@ const _episodes = [
   (
     title: 'A Conversation With Charlotte',
     youtubeId: '88TJ-HQA_qk',
+    startSeconds: 36,
   ),
 ];
 
@@ -111,6 +112,7 @@ class _PodcastsBody extends StatelessWidget {
                   child: _EpisodeCard(
                     title: ep.title,
                     youtubeId: ep.youtubeId,
+                    startSeconds: ep.startSeconds,
                     isMobile: isMobile,
                   ),
                 ))
@@ -123,11 +125,13 @@ class _PodcastsBody extends StatelessWidget {
 class _EpisodeCard extends StatefulWidget {
   final String title;
   final String youtubeId;
+  final int startSeconds;
   final bool isMobile;
 
   const _EpisodeCard({
     required this.title,
     required this.youtubeId,
+    required this.startSeconds,
     required this.isMobile,
   });
 
@@ -142,12 +146,14 @@ class _EpisodeCardState extends State<_EpisodeCard> {
       'https://img.youtube.com/vi/${widget.youtubeId}/maxresdefault.jpg';
 
   String get _watchUrl =>
-      'https://www.youtube.com/watch?v=${widget.youtubeId}';
+      'https://www.youtube.com/watch?v=${widget.youtubeId}&t=${widget.startSeconds}s';
 
-  void _open() => launchUrl(
-        Uri.parse(_watchUrl),
-        mode: LaunchMode.externalApplication,
-      );
+  Future<void> _open() async {
+    final uri = Uri.parse(_watchUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.platformDefault);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
