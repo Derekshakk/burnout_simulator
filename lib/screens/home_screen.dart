@@ -164,6 +164,7 @@ class _HeroSection extends StatelessWidget {
             child: Image.asset(
               'assets/home/home.jpg',
               fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
               errorBuilder: (context, error, stackTrace) =>
                   ColoredBox(color: AppColors.background),
             ),

@@ -1512,9 +1512,7 @@ class _PlayAgainPanel extends StatelessWidget {
           const SizedBox(height: 10),
           OutlinedButton.icon(
             onPressed: () => launchUrl(
-              Uri.parse(
-                'https://docs.google.com/forms/d/e/1FAIpQLSdZmyoQbHN0IGxx88vrCH0ALPOFCm87SCXcuIvFDKWYem1UDA/viewform?usp=header',
-              ),
+              Uri.parse('https://tinyurl.com/projectignitefeedback'),
               mode: LaunchMode.externalApplication,
             ),
             icon: const Icon(Icons.feedback_outlined, size: 16),
