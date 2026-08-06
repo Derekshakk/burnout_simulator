@@ -138,6 +138,12 @@ class _SiteNavigationState extends State<SiteNavigation> {
                     onTap: () => _handleResources(context),
                   ),
                   _NavLink(
+                    label: 'Podcasts',
+                    route: AppRoutes.podcasts,
+                    activeSection: widget.activeSection,
+                    onTap: () => _navigate(context, AppRoutes.podcasts),
+                  ),
+                  _NavLink(
                     label: 'Team',
                     route: AppRoutes.team,
                     activeSection: widget.activeSection,
@@ -431,6 +437,11 @@ class _MobileMenu extends StatelessWidget {
             label: 'Resources',
             isActive: activeSection == 'resources',
             onTap: onResources,
+          ),
+          _MobileMenuItem(
+            label: 'Podcasts',
+            isActive: activeSection == AppRoutes.podcasts,
+            onTap: () => onNavigate(AppRoutes.podcasts),
           ),
           _MobileMenuItem(
             label: 'Team',

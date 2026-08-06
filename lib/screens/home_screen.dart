@@ -786,20 +786,16 @@ class _ContactSectionState extends State<_ContactSection> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                OutlinedButton.icon(
+                ElevatedButton.icon(
                   onPressed: () => launchUrl(
-                    Uri.parse(
-                      'https://docs.google.com/forms/d/e/1FAIpQLSdZmyoQbHN0IGxx88vrCH0ALPOFCm87SCXcuIvFDKWYem1UDA/viewform?usp=header',
-                    ),
+                    Uri.parse('https://tinyurl.com/projectignitefeedback'),
                     mode: LaunchMode.externalApplication,
                   ),
                   icon: const Icon(Icons.feedback_outlined, size: 16),
                   label: const Text('Share Feedback or Suggestions'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.accent,
-                    side: BorderSide(
-                      color: AppColors.accent.withValues(alpha: 0.5),
-                    ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.navBackground,
+                    foregroundColor: AppColors.textOnDark,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
