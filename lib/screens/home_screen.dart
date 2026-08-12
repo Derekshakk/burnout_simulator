@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
 import '../models/game_state.dart';
+import '../services/external_action_service.dart';
 import '../widgets/site_navigation.dart';
 import '../widgets/project_ignite_logo.dart';
 import '../widgets/section_label.dart';
@@ -694,27 +694,32 @@ class _ContactSectionState extends State<_ContactSection> {
     final role = _roleController.text.trim();
     final message = _messageController.text.trim();
 
-    final subject = 'Project Ignite – Contact Form Submission';
-    final body =
-        'From: $name\nReply-to: $email\nRole/Reason: $role\n\nMessage:\n$message\n\n---\nSent via the Project Ignite website contact form.';
-    final uri = Uri(
-      scheme: 'mailto',
-      path: 'Dereksha2008@gmail.com',
-      queryParameters: {'subject': subject, 'body': body},
+    final uri = ExternalActionService.contactEmailUri(
+      name: name,
+      email: email,
+      role: role,
+      message: message,
     );
+    final launched = await ExternalActionService.openEmail(uri);
+    if (mounted) {
+      setState(
+        () => _state = launched ? _ContactState.launched : _ContactState.failed,
+      );
+    }
+  }
 
-    try {
-      final launched = await launchUrl(uri);
-      if (mounted) {
-        setState(
-          () =>
-              _state = launched ? _ContactState.launched : _ContactState.failed,
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() => _state = _ContactState.failed);
-      }
+  Future<void> _openFeedbackForm() async {
+    final opened = await ExternalActionService.openWebsite(
+      ExternalActionService.feedbackUrl,
+    );
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not open the feedback form. Please try again later.',
+          ),
+        ),
+      );
     }
   }
 
@@ -788,10 +793,7 @@ class _ContactSectionState extends State<_ContactSection> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
-                  onPressed: () => launchUrl(
-                    Uri.parse('https://tinyurl.com/projectignitefeedback'),
-                    mode: LaunchMode.externalApplication,
-                  ),
+                  onPressed: _openFeedbackForm,
                   icon: const Icon(Icons.feedback_outlined, size: 16),
                   label: const Text('Share Feedback or Suggestions'),
                   style: ElevatedButton.styleFrom(

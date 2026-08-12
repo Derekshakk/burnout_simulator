@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
 import '../models/character_profile.dart';
 import '../models/game_state.dart';
+import '../services/external_action_service.dart';
 import '../widgets/character_portrait.dart';
 import '../widgets/pixel_panel.dart';
 import '../widgets/site_navigation.dart';
@@ -1481,6 +1481,21 @@ class _PlayAgainPanel extends StatelessWidget {
 
   const _PlayAgainPanel({required this.onPlayAgain});
 
+  Future<void> _openFeedbackForm(BuildContext context) async {
+    final opened = await ExternalActionService.openWebsite(
+      ExternalActionService.feedbackUrl,
+    );
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not open the feedback form. Please try again later.',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PixelPanel(
@@ -1511,10 +1526,7 @@ class _PlayAgainPanel extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
-            onPressed: () => launchUrl(
-              Uri.parse('https://tinyurl.com/projectignitefeedback'),
-              mode: LaunchMode.externalApplication,
-            ),
+            onPressed: () => _openFeedbackForm(context),
             icon: const Icon(Icons.feedback_outlined, size: 16),
             label: const Text('Share Feedback or Suggestions'),
             style: OutlinedButton.styleFrom(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
 import '../models/game_state.dart';
+import '../services/external_action_service.dart';
 import '../widgets/section_label.dart';
 import '../widgets/site_navigation.dart';
 
@@ -148,10 +149,16 @@ class _EpisodeCardState extends State<_EpisodeCard> {
       'https://img.youtube.com/vi/${widget.youtubeId}/maxresdefault.jpg';
 
   Future<void> _open() async {
-    await launchUrl(
-      Uri.parse(widget.watchUrl),
-      mode: LaunchMode.platformDefault,
-    );
+    final opened = await ExternalActionService.openWebsite(widget.watchUrl);
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not open this YouTube video. Please try again later.',
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -217,49 +224,67 @@ class _Thumbnail extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => onHover(true),
       onExit: (_) => onHover(false),
-      child: GestureDetector(
-        onTap: onTap,
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                url,
-                fit: BoxFit.cover,
-                errorBuilder: (context, err, stack) => ColoredBox(
-                  color: AppColors.surfaceVariant,
-                  child: Icon(
-                    Icons.play_circle_outline,
-                    color: AppColors.textMuted,
-                    size: 48,
-                  ),
-                ),
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                color: Colors.black.withValues(alpha: hovered ? 0.25 : 0.1),
-              ),
-              Center(
-                child: AnimatedScale(
-                  scale: hovered ? 1.1 : 1.0,
-                  duration: const Duration(milliseconds: 150),
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade600,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.play_arrow_rounded,
-                      color: Colors.white,
-                      size: 32,
+      child: Semantics(
+        button: true,
+        label: 'Watch on YouTube',
+        child: FocusableActionDetector(
+          shortcuts: const <ShortcutActivator, Intent>{
+            SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+            SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+          },
+          actions: <Type, Action<Intent>>{
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                onTap();
+                return null;
+              },
+            ),
+          },
+          child: GestureDetector(
+            onTap: onTap,
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    url,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, err, stack) => ColoredBox(
+                      color: AppColors.surfaceVariant,
+                      child: Icon(
+                        Icons.play_circle_outline,
+                        color: AppColors.textMuted,
+                        size: 48,
+                      ),
                     ),
                   ),
-                ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    color: Colors.black.withValues(alpha: hovered ? 0.25 : 0.1),
+                  ),
+                  Center(
+                    child: AnimatedScale(
+                      scale: hovered ? 1.1 : 1.0,
+                      duration: const Duration(milliseconds: 150),
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade600,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

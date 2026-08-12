@@ -1,0 +1,85 @@
+import 'package:url_launcher/url_launcher.dart';
+
+typedef UrlLauncher =
+    Future<bool> Function(
+      Uri uri, {
+      LaunchMode mode,
+      String? webOnlyWindowName,
+    });
+
+/// Centralizes browser and email actions so every external destination is
+/// validated and launched consistently across Flutter platforms and the web.
+class ExternalActionService {
+  ExternalActionService._();
+
+  static const feedbackUrl = 'https://tinyurl.com/projectignitefeedback';
+  static const contactEmail = 'Dereksha2008@gmail.com';
+
+  /// Returns an HTTP(S) URI only when [url] is a complete external URL.
+  static Uri? websiteUri(String url) {
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null || !uri.hasAuthority) return null;
+    if (uri.scheme != 'http' && uri.scheme != 'https') return null;
+    return uri;
+  }
+
+  /// Opens a website in a separate browser tab on Flutter web.
+  ///
+  /// The launcher result is deliberately checked instead of using canLaunchUrl:
+  /// web browsers cannot reliably report protocol-handler availability ahead of
+  /// time, while launchUrl tells us if the browser actually accepted the action.
+  static Future<bool> openWebsite(String url, {UrlLauncher? launcher}) async {
+    final uri = websiteUri(url);
+    if (uri == null) return false;
+
+    try {
+      return await (launcher ?? launchUrl)(
+        uri,
+        mode: LaunchMode.platformDefault,
+        webOnlyWindowName: '_blank',
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Builds a correctly percent-encoded mailto URI for the contact form.
+  static Uri contactEmailUri({
+    required String name,
+    required String email,
+    required String role,
+    required String message,
+  }) {
+    const subject = 'Project Ignite – Contact Form Submission';
+    final body =
+        'From: $name\n'
+        'Reply-to: $email\n'
+        'Role/Reason: $role\n\n'
+        'Message:\n$message\n\n'
+        '---\n'
+        'Sent via the Project Ignite website contact form.';
+
+    return Uri(
+      scheme: 'mailto',
+      path: contactEmail,
+      queryParameters: {'subject': subject, 'body': body},
+    );
+  }
+
+  static bool isValidEmailUri(Uri uri) =>
+      uri.scheme == 'mailto' && uri.path.isNotEmpty;
+
+  /// Opens the visitor's configured email application with a prefilled draft.
+  static Future<bool> openEmail(Uri uri, {UrlLauncher? launcher}) async {
+    if (!isValidEmailUri(uri)) return false;
+
+    try {
+      return await (launcher ?? launchUrl)(
+        uri,
+        mode: LaunchMode.platformDefault,
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+}

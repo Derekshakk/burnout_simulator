@@ -87,6 +87,10 @@ class _SiteNavigationState extends State<SiteNavigation> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 1100;
+    // Seven public navigation links fit comfortably on wide desktops, but at
+    // common 1400–1440px desktop widths the full spacing overflows. Keep the
+    // desktop links (and their keyboard order) available with compact spacing.
+    final useCompactDesktopLinks = !isMobile && width < 1500;
     // At larger mobile widths, keep the direct Play control. On narrower
     // layouts (including enlarged-text users), place it in the menu instead
     // so the header cannot overflow.
@@ -107,7 +111,9 @@ class _SiteNavigationState extends State<SiteNavigation> {
             ),
           ),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 32),
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : (useCompactDesktopLinks ? 16 : 32),
+            ),
             child: Row(
               children: [
                 _LogoWidget(isMobile: isMobile),
@@ -117,48 +123,56 @@ class _SiteNavigationState extends State<SiteNavigation> {
                     label: 'Home',
                     route: AppRoutes.home,
                     activeSection: widget.activeSection,
+                    compact: useCompactDesktopLinks,
                     onTap: () => _navigate(context, AppRoutes.home),
                   ),
                   _NavLink(
                     label: 'About the Game',
                     route: AppRoutes.about,
                     activeSection: widget.activeSection,
+                    compact: useCompactDesktopLinks,
                     onTap: () => _navigate(context, AppRoutes.about),
                   ),
                   _NavLink(
                     label: 'How Burnout Works',
                     route: AppRoutes.burnout,
                     activeSection: widget.activeSection,
+                    compact: useCompactDesktopLinks,
                     onTap: () => _navigate(context, AppRoutes.burnout),
                   ),
                   _NavLink(
                     label: 'Resources',
                     route: 'resources',
                     activeSection: widget.activeSection,
+                    compact: useCompactDesktopLinks,
                     onTap: () => _handleResources(context),
                   ),
                   _NavLink(
                     label: 'Podcasts',
                     route: AppRoutes.podcasts,
                     activeSection: widget.activeSection,
+                    compact: useCompactDesktopLinks,
                     onTap: () => _navigate(context, AppRoutes.podcasts),
                   ),
                   _NavLink(
                     label: 'Team',
                     route: AppRoutes.team,
                     activeSection: widget.activeSection,
+                    compact: useCompactDesktopLinks,
                     onTap: () => _navigate(context, AppRoutes.team),
                   ),
                   _NavLink(
                     label: 'Contact',
                     route: 'contact',
                     activeSection: widget.activeSection,
+                    compact: useCompactDesktopLinks,
                     onTap: () => _handleContact(context),
                   ),
                   const SizedBox(width: 16),
                   _PlayButton(
                     onTap: () => _navigate(context, AppRoutes.play),
                     isActive: widget.activeSection == AppRoutes.play,
+                    compact: useCompactDesktopLinks,
                   ),
                 ] else ...[
                   if (showMobilePlayButton &&
@@ -211,12 +225,14 @@ class _NavLink extends StatefulWidget {
   final String route;
   final String activeSection;
   final VoidCallback onTap;
+  final bool compact;
 
   const _NavLink({
     required this.label,
     required this.route,
     required this.activeSection,
     required this.onTap,
+    this.compact = false,
   });
 
   @override
@@ -261,7 +277,10 @@ class _NavLinkState extends State<_NavLink> {
           child: GestureDetector(
             onTap: widget.onTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.compact ? 4 : 12,
+                vertical: 8,
+              ),
               decoration: BoxDecoration(
                 color: _isActive || _hovered
                     ? AppColors.surface.withValues(
@@ -310,8 +329,13 @@ class _NavLinkState extends State<_NavLink> {
 class _PlayButton extends StatefulWidget {
   final VoidCallback onTap;
   final bool isActive;
+  final bool compact;
 
-  const _PlayButton({required this.onTap, required this.isActive});
+  const _PlayButton({
+    required this.onTap,
+    required this.isActive,
+    this.compact = false,
+  });
 
   @override
   State<_PlayButton> createState() => _PlayButtonState();
@@ -349,7 +373,10 @@ class _PlayButtonState extends State<_PlayButton> {
           child: GestureDetector(
             onTap: widget.onTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.compact ? 10 : 14,
+                vertical: 6,
+              ),
               decoration: BoxDecoration(
                 color: _hovered || widget.isActive || _focused
                     ? AppColors.surface.withValues(alpha: 0.8)
