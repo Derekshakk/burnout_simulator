@@ -23,11 +23,11 @@ class ExternalActionService {
     return uri;
   }
 
-  /// Opens a website in a separate browser tab on Flutter web.
+  /// Opens a website in a separate browser tab for non-web callers.
   ///
-  /// The launcher result is deliberately checked instead of using canLaunchUrl:
-  /// web browsers cannot reliably report protocol-handler availability ahead of
-  /// time, while launchUrl tells us if the browser actually accepted the action.
+  /// On Flutter web, render user-facing HTTP(S) actions with url_launcher's
+  /// Link widget instead. It creates a native anchor, while popup success
+  /// cannot be observed reliably through window.open.
   static Future<bool> openWebsite(String url, {UrlLauncher? launcher}) async {
     final uri = websiteUri(url);
     if (uri == null) return false;
@@ -77,6 +77,9 @@ class ExternalActionService {
       return await (launcher ?? launchUrl)(
         uri,
         mode: LaunchMode.platformDefault,
+        // Protocol handlers such as mailto: are most reliable when dispatched
+        // from the active browsing context rather than a popup-style tab.
+        webOnlyWindowName: '_self',
       );
     } catch (_) {
       return false;

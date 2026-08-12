@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/link.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
@@ -708,21 +709,6 @@ class _ContactSectionState extends State<_ContactSection> {
     }
   }
 
-  Future<void> _openFeedbackForm() async {
-    final opened = await ExternalActionService.openWebsite(
-      ExternalActionService.feedbackUrl,
-    );
-    if (!opened && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not open the feedback form. Please try again later.',
-          ),
-        ),
-      );
-    }
-  }
-
   void _reset() {
     _formKey.currentState?.reset();
     _nameController.clear();
@@ -792,16 +778,22 @@ class _ContactSectionState extends State<_ContactSection> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: _openFeedbackForm,
-                  icon: const Icon(Icons.feedback_outlined, size: 16),
-                  label: const Text('Share Feedback or Suggestions'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.navBackground,
-                    foregroundColor: AppColors.textOnDark,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                Link(
+                  uri: ExternalActionService.websiteUri(
+                    ExternalActionService.feedbackUrl,
+                  ),
+                  target: LinkTarget.blank,
+                  builder: (context, followLink) => ElevatedButton.icon(
+                    onPressed: followLink,
+                    icon: const Icon(Icons.feedback_outlined, size: 16),
+                    label: const Text('Share Feedback or Suggestions'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.navBackground,
+                      foregroundColor: AppColors.textOnDark,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),

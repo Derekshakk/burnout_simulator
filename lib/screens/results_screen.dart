@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/link.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
@@ -1481,21 +1482,6 @@ class _PlayAgainPanel extends StatelessWidget {
 
   const _PlayAgainPanel({required this.onPlayAgain});
 
-  Future<void> _openFeedbackForm(BuildContext context) async {
-    final opened = await ExternalActionService.openWebsite(
-      ExternalActionService.feedbackUrl,
-    );
-    if (!opened && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not open the feedback form. Please try again later.',
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return PixelPanel(
@@ -1525,14 +1511,22 @@ class _PlayAgainPanel extends StatelessWidget {
             child: const Text('Return to Home'),
           ),
           const SizedBox(height: 10),
-          OutlinedButton.icon(
-            onPressed: () => _openFeedbackForm(context),
-            icon: const Icon(Icons.feedback_outlined, size: 16),
-            label: const Text('Share Feedback or Suggestions'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              side: BorderSide(color: AppColors.accent.withValues(alpha: 0.5)),
-              foregroundColor: AppColors.accent,
+          Link(
+            uri: ExternalActionService.websiteUri(
+              ExternalActionService.feedbackUrl,
+            ),
+            target: LinkTarget.blank,
+            builder: (context, followLink) => OutlinedButton.icon(
+              onPressed: followLink,
+              icon: const Icon(Icons.feedback_outlined, size: 16),
+              label: const Text('Share Feedback or Suggestions'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: BorderSide(
+                  color: AppColors.accent.withValues(alpha: 0.5),
+                ),
+                foregroundColor: AppColors.accent,
+              ),
             ),
           ),
           const SizedBox(height: 12),

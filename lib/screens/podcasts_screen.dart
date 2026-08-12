@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/link.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
@@ -148,59 +149,59 @@ class _EpisodeCardState extends State<_EpisodeCard> {
   String get _thumbnailUrl =>
       'https://img.youtube.com/vi/${widget.youtubeId}/maxresdefault.jpg';
 
-  Future<void> _open() async {
-    final opened = await ExternalActionService.openWebsite(widget.watchUrl);
-    if (!opened && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Could not open this YouTube video. Please try again later.',
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 720),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.border, width: 1),
-        ),
-        child: widget.isMobile
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Thumbnail(
-                    url: _thumbnailUrl,
-                    hovered: _hovered,
-                    onTap: _open,
-                    onHover: (v) => setState(() => _hovered = v),
+    return Link(
+      uri: ExternalActionService.websiteUri(widget.watchUrl),
+      target: LinkTarget.blank,
+      builder: (context, followLink) {
+        final VoidCallback? openVideo = followLink == null
+            ? null
+            : () => followLink();
+
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.border, width: 1),
+            ),
+            child: widget.isMobile
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _Thumbnail(
+                        url: _thumbnailUrl,
+                        hovered: _hovered,
+                        onTap: openVideo,
+                        onHover: (v) => setState(() => _hovered = v),
+                      ),
+                      _EpisodeInfo(title: widget.title, onWatch: openVideo),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 280,
+                        child: _Thumbnail(
+                          url: _thumbnailUrl,
+                          hovered: _hovered,
+                          onTap: openVideo,
+                          onHover: (v) => setState(() => _hovered = v),
+                        ),
+                      ),
+                      Expanded(
+                        child: _EpisodeInfo(
+                          title: widget.title,
+                          onWatch: openVideo,
+                        ),
+                      ),
+                    ],
                   ),
-                  _EpisodeInfo(title: widget.title, onWatch: _open),
-                ],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 280,
-                    child: _Thumbnail(
-                      url: _thumbnailUrl,
-                      hovered: _hovered,
-                      onTap: _open,
-                      onHover: (v) => setState(() => _hovered = v),
-                    ),
-                  ),
-                  Expanded(
-                    child: _EpisodeInfo(title: widget.title, onWatch: _open),
-                  ),
-                ],
-              ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -208,7 +209,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
 class _Thumbnail extends StatelessWidget {
   final String url;
   final bool hovered;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final ValueChanged<bool> onHover;
 
   const _Thumbnail({
@@ -235,7 +236,7 @@ class _Thumbnail extends StatelessWidget {
           actions: <Type, Action<Intent>>{
             ActivateIntent: CallbackAction<ActivateIntent>(
               onInvoke: (_) {
-                onTap();
+                onTap?.call();
                 return null;
               },
             ),
@@ -294,7 +295,7 @@ class _Thumbnail extends StatelessWidget {
 
 class _EpisodeInfo extends StatelessWidget {
   final String title;
-  final VoidCallback onWatch;
+  final VoidCallback? onWatch;
 
   const _EpisodeInfo({required this.title, required this.onWatch});
 

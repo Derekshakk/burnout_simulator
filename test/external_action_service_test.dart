@@ -111,5 +111,29 @@ void main() {
       expect(opened, isFalse);
       expect(launchCalled, isFalse);
     });
+
+    test('opens email actions in the active browser context', () async {
+      String? windowName;
+      final opened = await ExternalActionService.openEmail(
+        ExternalActionService.contactEmailUri(
+          name: 'Alex',
+          email: 'alex@example.com',
+          role: 'Student',
+          message: 'Hello',
+        ),
+        launcher:
+            (
+              uri, {
+              mode = LaunchMode.platformDefault,
+              webOnlyWindowName,
+            }) async {
+              windowName = webOnlyWindowName;
+              return true;
+            },
+      );
+
+      expect(opened, isTrue);
+      expect(windowName, '_self');
+    });
   });
 }
