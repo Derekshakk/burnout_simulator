@@ -86,11 +86,11 @@ class _SiteNavigationState extends State<SiteNavigation> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final isMobile = width < 1100;
-    // Seven public navigation links fit comfortably on wide desktops, but at
-    // common 1400–1440px desktop widths the full spacing overflows. Keep the
+    final isMobile = width < 1280;
+    // Eight public navigation links fit comfortably on wide desktops, but at
+    // common 1400–1600px desktop widths the full spacing overflows. Keep the
     // desktop links (and their keyboard order) available with compact spacing.
-    final useCompactDesktopLinks = !isMobile && width < 1500;
+    final useCompactDesktopLinks = !isMobile && width < 1680;
     // At larger mobile widths, keep the direct Play control. On narrower
     // layouts (including enlarged-text users), place it in the menu instead
     // so the header cannot overflow.
@@ -117,64 +117,88 @@ class _SiteNavigationState extends State<SiteNavigation> {
             child: Row(
               children: [
                 _LogoWidget(isMobile: isMobile),
-                const Spacer(),
-                if (!isMobile) ...[
-                  _NavLink(
-                    label: 'Home',
-                    route: AppRoutes.home,
-                    activeSection: widget.activeSection,
-                    compact: useCompactDesktopLinks,
-                    onTap: () => _navigate(context, AppRoutes.home),
-                  ),
-                  _NavLink(
-                    label: 'About the Game',
-                    route: AppRoutes.about,
-                    activeSection: widget.activeSection,
-                    compact: useCompactDesktopLinks,
-                    onTap: () => _navigate(context, AppRoutes.about),
-                  ),
-                  _NavLink(
-                    label: 'How Burnout Works',
-                    route: AppRoutes.burnout,
-                    activeSection: widget.activeSection,
-                    compact: useCompactDesktopLinks,
-                    onTap: () => _navigate(context, AppRoutes.burnout),
-                  ),
-                  _NavLink(
-                    label: 'Resources',
-                    route: 'resources',
-                    activeSection: widget.activeSection,
-                    compact: useCompactDesktopLinks,
-                    onTap: () => _handleResources(context),
-                  ),
-                  _NavLink(
-                    label: 'Podcasts',
-                    route: AppRoutes.podcasts,
-                    activeSection: widget.activeSection,
-                    compact: useCompactDesktopLinks,
-                    onTap: () => _navigate(context, AppRoutes.podcasts),
-                  ),
-                  _NavLink(
-                    label: 'Team',
-                    route: AppRoutes.team,
-                    activeSection: widget.activeSection,
-                    compact: useCompactDesktopLinks,
-                    onTap: () => _navigate(context, AppRoutes.team),
-                  ),
-                  _NavLink(
-                    label: 'Contact',
-                    route: 'contact',
-                    activeSection: widget.activeSection,
-                    compact: useCompactDesktopLinks,
-                    onTap: () => _handleContact(context),
-                  ),
-                  const SizedBox(width: 16),
-                  _PlayButton(
-                    onTap: () => _navigate(context, AppRoutes.play),
-                    isActive: widget.activeSection == AppRoutes.play,
-                    compact: useCompactDesktopLinks,
-                  ),
-                ] else ...[
+                if (!isMobile)
+                  // Right-align the links and let them scale down to fit rather
+                  // than overflow when the eight labels are wider than the bar
+                  // (e.g. narrower desktops or enlarged text). Keyboard order
+                  // and focus are preserved because the Row children are
+                  // unchanged.
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _NavLink(
+                            label: 'Home',
+                            route: AppRoutes.home,
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () => _navigate(context, AppRoutes.home),
+                          ),
+                          _NavLink(
+                            label: 'About the Game',
+                            route: AppRoutes.about,
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () => _navigate(context, AppRoutes.about),
+                          ),
+                          _NavLink(
+                            label: 'How Burnout Works',
+                            route: AppRoutes.burnout,
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () => _navigate(context, AppRoutes.burnout),
+                          ),
+                          _NavLink(
+                            label: 'Resources',
+                            route: 'resources',
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () => _handleResources(context),
+                          ),
+                          _NavLink(
+                            label: 'Podcasts',
+                            route: AppRoutes.podcasts,
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () => _navigate(context, AppRoutes.podcasts),
+                          ),
+                          _NavLink(
+                            label: 'Team',
+                            route: AppRoutes.team,
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () => _navigate(context, AppRoutes.team),
+                          ),
+                          _NavLink(
+                            label: 'Testimonials',
+                            route: AppRoutes.testimonials,
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () =>
+                                _navigate(context, AppRoutes.testimonials),
+                          ),
+                          _NavLink(
+                            label: 'Contact',
+                            route: 'contact',
+                            activeSection: widget.activeSection,
+                            compact: useCompactDesktopLinks,
+                            onTap: () => _handleContact(context),
+                          ),
+                          const SizedBox(width: 16),
+                          _PlayButton(
+                            onTap: () => _navigate(context, AppRoutes.play),
+                            isActive: widget.activeSection == AppRoutes.play,
+                            compact: useCompactDesktopLinks,
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else ...[
+                  const Spacer(),
                   if (showMobilePlayButton &&
                       widget.activeSection != AppRoutes.play) ...[
                     _PlayButton(
@@ -474,6 +498,11 @@ class _MobileMenu extends StatelessWidget {
             label: 'Team',
             isActive: activeSection == AppRoutes.team,
             onTap: () => onNavigate(AppRoutes.team),
+          ),
+          _MobileMenuItem(
+            label: 'Testimonials',
+            isActive: activeSection == AppRoutes.testimonials,
+            onTap: () => onNavigate(AppRoutes.testimonials),
           ),
           _MobileMenuItem(
             label: 'Contact',

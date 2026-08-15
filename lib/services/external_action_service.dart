@@ -15,6 +15,7 @@ class ExternalActionService {
   ExternalActionService._();
 
   static const feedbackUrl = 'https://tinyurl.com/projectignitefeedback';
+  static const testimonialsFormUrl = 'https://forms.gle/GK5ZHGy8hHuXUBFv8';
   static const contactEmail = 'Dereksha2008@gmail.com';
 
   /// Returns an HTTP(S) URI only when [url] is a complete external URL.

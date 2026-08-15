@@ -1518,9 +1518,7 @@ class _PlayAgainPanel extends StatelessWidget {
             label: const Text('Share Feedback or Suggestions'),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              side: BorderSide(
-                color: AppColors.accent.withValues(alpha: 0.5),
-              ),
+              side: BorderSide(color: AppColors.accent.withValues(alpha: 0.5)),
               foregroundColor: AppColors.accent,
             ),
           ),

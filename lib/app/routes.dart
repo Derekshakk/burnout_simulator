@@ -9,4 +9,5 @@ class AppRoutes {
   static const String team = '/team';
   static const String contact = '/contact';
   static const String podcasts = '/podcasts';
+  static const String testimonials = '/testimonials';
 }

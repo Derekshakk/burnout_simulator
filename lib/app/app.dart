@@ -10,6 +10,7 @@ import '../screens/results_screen.dart';
 import '../screens/simulation_screen.dart';
 import '../screens/podcasts_screen.dart';
 import '../screens/team_screen.dart';
+import '../screens/testimonials_screen.dart';
 import 'routes.dart';
 import 'theme.dart';
 
@@ -88,6 +89,7 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
             AppRoutes.team,
             AppRoutes.contact,
             AppRoutes.podcasts,
+            AppRoutes.testimonials,
           };
           final route = knownRoutes.contains(requestedRoute)
               ? _gameState.routeFor(requestedRoute)
@@ -102,7 +104,8 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
               route == AppRoutes.resources ||
               route == AppRoutes.team ||
               route == AppRoutes.contact ||
-              route == AppRoutes.podcasts) {
+              route == AppRoutes.podcasts ||
+              route == AppRoutes.testimonials) {
             _gameState.endSession();
           }
           final effectiveSettings = RouteSettings(name: route);
@@ -137,6 +140,12 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
                 settings: effectiveSettings,
                 builder: (_) =>
                     _a11yRoute(() => PodcastsScreen(gameState: _gameState)),
+              );
+            case AppRoutes.testimonials:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) =>
+                    _a11yRoute(() => TestimonialsScreen(gameState: _gameState)),
               );
             case AppRoutes.resources:
             case AppRoutes.contact:

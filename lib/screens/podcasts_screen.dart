@@ -187,7 +187,10 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                     ),
                   ),
                   Expanded(
-                    child: _EpisodeInfo(title: widget.title, onWatch: _openVideo),
+                    child: _EpisodeInfo(
+                      title: widget.title,
+                      onWatch: _openVideo,
+                    ),
                   ),
                 ],
               ),
