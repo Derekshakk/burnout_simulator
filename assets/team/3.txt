@@ -1,3 +1,3 @@
-Name: Team Member Three
-Role: Flutter Developer
-Bio: Built the simulation engine, scenario logic, and the web frontend. Implemented character-specific scenarios, shared scenarios, and the results analysis system.
+Name: Charlotte Peng
+Role: UI/UX Designer, Game storyboarder
+Bio: I'm Charlotte, a rising junior from CA. I'm on the storyboarding team and the UI/UX designer for Project Ignite. I identify as AuDHD (autism + ADHD) and fence on the international stage!

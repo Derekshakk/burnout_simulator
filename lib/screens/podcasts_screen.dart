@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/link.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
@@ -149,59 +148,50 @@ class _EpisodeCardState extends State<_EpisodeCard> {
   String get _thumbnailUrl =>
       'https://img.youtube.com/vi/${widget.youtubeId}/maxresdefault.jpg';
 
+  void _openVideo() {
+    ExternalActionService.openWebsite(widget.watchUrl);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Link(
-      uri: ExternalActionService.websiteUri(widget.watchUrl),
-      target: LinkTarget.blank,
-      builder: (context, followLink) {
-        final VoidCallback? openVideo = followLink == null
-            ? null
-            : () => followLink();
-
-        return ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.border, width: 1),
-            ),
-            child: widget.isMobile
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _Thumbnail(
-                        url: _thumbnailUrl,
-                        hovered: _hovered,
-                        onTap: openVideo,
-                        onHover: (v) => setState(() => _hovered = v),
-                      ),
-                      _EpisodeInfo(title: widget.title, onWatch: openVideo),
-                    ],
-                  )
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 280,
-                        child: _Thumbnail(
-                          url: _thumbnailUrl,
-                          hovered: _hovered,
-                          onTap: openVideo,
-                          onHover: (v) => setState(() => _hovered = v),
-                        ),
-                      ),
-                      Expanded(
-                        child: _EpisodeInfo(
-                          title: widget.title,
-                          onWatch: openVideo,
-                        ),
-                      ),
-                    ],
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.border, width: 1),
+        ),
+        child: widget.isMobile
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Thumbnail(
+                    url: _thumbnailUrl,
+                    hovered: _hovered,
+                    onTap: _openVideo,
+                    onHover: (v) => setState(() => _hovered = v),
                   ),
-          ),
-        );
-      },
+                  _EpisodeInfo(title: widget.title, onWatch: _openVideo),
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 280,
+                    child: _Thumbnail(
+                      url: _thumbnailUrl,
+                      hovered: _hovered,
+                      onTap: _openVideo,
+                      onHover: (v) => setState(() => _hovered = v),
+                    ),
+                  ),
+                  Expanded(
+                    child: _EpisodeInfo(title: widget.title, onWatch: _openVideo),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

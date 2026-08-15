@@ -1,5 +1,7 @@
 import 'package:url_launcher/url_launcher.dart';
 
+import 'external_launcher.dart';
+
 typedef UrlLauncher =
     Future<bool> Function(
       Uri uri, {
@@ -32,15 +34,21 @@ class ExternalActionService {
     final uri = websiteUri(url);
     if (uri == null) return false;
 
-    try {
-      return await (launcher ?? launchUrl)(
-        uri,
-        mode: LaunchMode.platformDefault,
-        webOnlyWindowName: '_blank',
-      );
-    } catch (_) {
-      return false;
+    // Tests inject a launcher and assert on its arguments; honor it exactly.
+    if (launcher != null) {
+      try {
+        return await launcher(
+          uri,
+          mode: LaunchMode.platformDefault,
+          webOnlyWindowName: '_blank',
+        );
+      } catch (_) {
+        return false;
+      }
     }
+
+    // Production: use the popup-blocker-safe opener (anchor click on web).
+    return openExternalUrl(uri.toString(), sameTab: false);
   }
 
   /// Builds a correctly percent-encoded mailto URI for the contact form.
@@ -73,16 +81,23 @@ class ExternalActionService {
   static Future<bool> openEmail(Uri uri, {UrlLauncher? launcher}) async {
     if (!isValidEmailUri(uri)) return false;
 
-    try {
-      return await (launcher ?? launchUrl)(
-        uri,
-        mode: LaunchMode.platformDefault,
-        // Protocol handlers such as mailto: are most reliable when dispatched
-        // from the active browsing context rather than a popup-style tab.
-        webOnlyWindowName: '_self',
-      );
-    } catch (_) {
-      return false;
+    // Tests inject a launcher and assert on its arguments; honor it exactly.
+    if (launcher != null) {
+      try {
+        return await launcher(
+          uri,
+          mode: LaunchMode.platformDefault,
+          // Protocol handlers such as mailto: are most reliable when dispatched
+          // from the active browsing context rather than a popup-style tab.
+          webOnlyWindowName: '_self',
+        );
+      } catch (_) {
+        return false;
+      }
     }
+
+    // Production: anchor-click the mailto in the current context (web) or hand
+    // off to the platform launcher (mobile/desktop).
+    return openExternalUrl(uri.toString(), sameTab: true);
   }
 }

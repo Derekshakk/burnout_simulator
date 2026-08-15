@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/link.dart';
 import '../accessibility/a11y_widgets.dart';
 import '../app/routes.dart';
 import '../app/theme.dart';
@@ -778,22 +777,18 @@ class _ContactSectionState extends State<_ContactSection> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Link(
-                  uri: ExternalActionService.websiteUri(
+                ElevatedButton.icon(
+                  onPressed: () => ExternalActionService.openWebsite(
                     ExternalActionService.feedbackUrl,
                   ),
-                  target: LinkTarget.blank,
-                  builder: (context, followLink) => ElevatedButton.icon(
-                    onPressed: followLink,
-                    icon: const Icon(Icons.feedback_outlined, size: 16),
-                    label: const Text('Share Feedback or Suggestions'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.navBackground,
-                      foregroundColor: AppColors.textOnDark,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
+                  icon: const Icon(Icons.feedback_outlined, size: 16),
+                  label: const Text('Share Feedback or Suggestions'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.navBackground,
+                    foregroundColor: AppColors.textOnDark,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
                   ),
                 ),

@@ -172,33 +172,6 @@ class _TeamGrid extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            color: AppColors.accentAmber.withValues(alpha: 0.12),
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Icon(
-                  Icons.edit_outlined,
-                  color: AppColors.accentAmber,
-                  size: 13,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'PLACEHOLDER — Replace names and roles before publishing',
-                  style: TextStyle(
-                    color: AppColors.accentAmber,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -216,24 +189,31 @@ class _TeamCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(color: AppColors.cardBorderGold, width: 1.5),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (member.hasPhoto)
-              Image.asset(
-                member.imagePath,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  member.imagePath,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
               )
             else
               Container(
                 width: 80,
                 height: 80,
-                color: AppColors.surfaceVariant,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 alignment: Alignment.center,
                 child: Icon(Icons.person, color: AppColors.accent, size: 36),
               ),

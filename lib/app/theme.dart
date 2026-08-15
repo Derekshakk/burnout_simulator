@@ -39,6 +39,7 @@ class AppPalette {
   final Color feedbackSurface;
   final Color accentGreen;
   final Color accentAmber;
+  final Color cardBorderGold;
   final Color accentRed;
   final Color accentPurple;
   final Color pixelGreen;
@@ -102,6 +103,7 @@ class AppPalette {
     required this.feedbackSurface,
     required this.accentGreen,
     required this.accentAmber,
+    required this.cardBorderGold,
     required this.accentRed,
     required this.accentPurple,
     required this.pixelGreen,
@@ -196,6 +198,7 @@ const AppPalette _defaultPalette = AppPalette(
   // ── semantic accents (deepened for legibility on light surfaces) ──────────
   accentGreen: Color(0xFF27734D), // 4.5:1 on cream
   accentAmber: Color(0xFF8A5818), // 4.7:1 on cream
+  cardBorderGold: Color(0xFFC49040), // warm golden-orange for card borders
   accentRed: Color(0xFFA63B36), // 5.0:1 on cream
   accentPurple: Color(0xFF665287), // 5.3:1 on cream
   pixelGreen: Color(0xFF27734D),
@@ -262,6 +265,7 @@ const AppPalette _highContrastPalette = AppPalette(
   feedbackSurface: Color(0xFF000000),
   accentGreen: Color(0xFF6EF0A6),
   accentAmber: Color(0xFFFFD84D),
+  cardBorderGold: Color(0xFFFFD84D), // same as HC accentAmber — vivid gold
   accentRed: Color(0xFFFF7A7A),
   accentPurple: Color(0xFFEC9BFF),
   pixelGreen: Color(0xFF8CFFA0),
@@ -334,6 +338,7 @@ class AppColors {
   static Color get feedbackSurface => palette.feedbackSurface;
   static Color get accentGreen => palette.accentGreen;
   static Color get accentAmber => palette.accentAmber;
+  static Color get cardBorderGold => palette.cardBorderGold;
   static Color get accentRed => palette.accentRed;
   static Color get accentPurple => palette.accentPurple;
   static Color get pixelGreen => palette.pixelGreen;
