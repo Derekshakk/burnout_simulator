@@ -548,11 +548,11 @@ class _ExplorePreviewSection extends StatelessWidget {
               children: [
                 _ExploreCard(
                   icon: Icons.psychology_outlined,
-                  title: 'How Burnout Works',
+                  title: 'Research',
                   body:
-                      'Understand what neurodivergent burnout is, why masking adds to the load, and how recovery and coping take many forms.',
-                  buttonLabel: 'Learn How Burnout Works',
-                  onTap: () => Navigator.pushNamed(context, AppRoutes.burnout),
+                      'Explore the frameworks behind the project — Universal Design for Learning and the Strength-Based Model — plus research on autistic and ADHD burnout.',
+                  buttonLabel: 'Explore the Research',
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.research),
                 ),
                 const SizedBox(height: 16),
                 _ExploreCard(
@@ -573,12 +573,12 @@ class _ExplorePreviewSection extends StatelessWidget {
                   Expanded(
                     child: _ExploreCard(
                       icon: Icons.psychology_outlined,
-                      title: 'How Burnout Works',
+                      title: 'Research',
                       body:
-                          'Understand what neurodivergent burnout is, why masking adds to the load, and how recovery and coping take many forms.',
-                      buttonLabel: 'Learn How Burnout Works',
+                          'Explore the frameworks behind the project — Universal Design for Learning and the Strength-Based Model — plus research on autistic and ADHD burnout.',
+                      buttonLabel: 'Explore the Research',
                       onTap: () =>
-                          Navigator.pushNamed(context, AppRoutes.burnout),
+                          Navigator.pushNamed(context, AppRoutes.research),
                     ),
                   ),
                   const SizedBox(width: 20),

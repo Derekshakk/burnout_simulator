@@ -10,6 +10,8 @@ void main() {
   for (final entry in <({String route, String expectedText})>[
     (route: AppRoutes.home, expectedText: 'EDUCATIONAL SIMULATION'),
     (route: AppRoutes.about, expectedText: 'ABOUT THE GAME'),
+    (route: AppRoutes.research, expectedText: 'RESEARCH'),
+    (route: AppRoutes.burnout, expectedText: 'RESEARCH'),
     (route: AppRoutes.select, expectedText: 'CHOOSE YOUR CHARACTER'),
     (route: AppRoutes.team, expectedText: 'MEET THE TEAM'),
     (route: AppRoutes.contact, expectedText: 'CONTACT / FEEDBACK'),

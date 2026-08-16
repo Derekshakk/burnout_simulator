@@ -35,11 +35,11 @@ class _SiteNavigationState extends State<SiteNavigation> {
         SessionNavigation.goHome(context, widget.gameState);
       case AppRoutes.about:
         SessionNavigation.goAbout(context, widget.gameState);
-      case AppRoutes.burnout:
+      case AppRoutes.research:
         SessionNavigation.goHomeSection(
           context,
           widget.gameState,
-          AppRoutes.burnout,
+          AppRoutes.research,
         );
       case AppRoutes.team:
         SessionNavigation.goHomeSection(
@@ -145,11 +145,11 @@ class _SiteNavigationState extends State<SiteNavigation> {
                             onTap: () => _navigate(context, AppRoutes.about),
                           ),
                           _NavLink(
-                            label: 'How Burnout Works',
-                            route: AppRoutes.burnout,
+                            label: 'Research',
+                            route: AppRoutes.research,
                             activeSection: widget.activeSection,
                             compact: useCompactDesktopLinks,
-                            onTap: () => _navigate(context, AppRoutes.burnout),
+                            onTap: () => _navigate(context, AppRoutes.research),
                           ),
                           _NavLink(
                             label: 'Resources',
@@ -480,9 +480,9 @@ class _MobileMenu extends StatelessWidget {
             onTap: () => onNavigate(AppRoutes.about),
           ),
           _MobileMenuItem(
-            label: 'How Burnout Works',
-            isActive: activeSection == AppRoutes.burnout,
-            onTap: () => onNavigate(AppRoutes.burnout),
+            label: 'Research',
+            isActive: activeSection == AppRoutes.research,
+            onTap: () => onNavigate(AppRoutes.research),
           ),
           _MobileMenuItem(
             label: 'Resources',

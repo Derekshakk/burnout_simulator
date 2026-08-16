@@ -5,7 +5,7 @@ import '../models/game_state.dart';
 import '../screens/character_select_screen.dart';
 import '../screens/game_overview_screen.dart';
 import '../screens/home_screen.dart';
-import '../screens/how_burnout_works_screen.dart';
+import '../screens/research_screen.dart';
 import '../screens/results_screen.dart';
 import '../screens/simulation_screen.dart';
 import '../screens/podcasts_screen.dart';
@@ -85,6 +85,7 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
             AppRoutes.play,
             AppRoutes.results,
             AppRoutes.burnout,
+            AppRoutes.research,
             AppRoutes.resources,
             AppRoutes.team,
             AppRoutes.contact,
@@ -101,6 +102,7 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
               route == AppRoutes.about ||
               route == AppRoutes.select ||
               route == AppRoutes.burnout ||
+              route == AppRoutes.research ||
               route == AppRoutes.resources ||
               route == AppRoutes.team ||
               route == AppRoutes.contact ||
@@ -122,12 +124,20 @@ class _BurnoutSimulatorAppState extends State<BurnoutSimulatorApp> {
                 builder: (_) =>
                     _a11yRoute(() => GameOverviewScreen(gameState: _gameState)),
               );
+            // `/burnout` is kept as a backward-compatible alias so existing
+            // links and bookmarks land on the autistic-burnout research tab.
             case AppRoutes.burnout:
               return MaterialPageRoute(
                 settings: effectiveSettings,
                 builder: (_) => _a11yRoute(
-                  () => HowBurnoutWorksScreen(gameState: _gameState),
+                  () => ResearchScreen(gameState: _gameState, initialTab: 1),
                 ),
+              );
+            case AppRoutes.research:
+              return MaterialPageRoute(
+                settings: effectiveSettings,
+                builder: (_) =>
+                    _a11yRoute(() => ResearchScreen(gameState: _gameState)),
               );
             case AppRoutes.team:
               return MaterialPageRoute(
