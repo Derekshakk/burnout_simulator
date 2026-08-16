@@ -27,6 +27,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('What Is ADHD Burnout?'), findsOneWidget);
+    expect(find.text('What causes ADHD burnout?'), findsOneWidget);
+    expect(find.text('How to prevent ADHD burnout?'), findsOneWidget);
+    expect(
+      find.text('What are tools to alleviate ADHD burnout?'),
+      findsOneWidget,
+    );
+    expect(find.text('Content coming soon'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -44,7 +51,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      final adhdBurnoutTab = find.text('ADHD Burnout');
+      await tester.ensureVisible(adhdBurnoutTab);
+      await tester.tap(adhdBurnoutTab);
+      await tester.pumpAndSettle();
+
       expect(find.text('Research'), findsOneWidget);
+      expect(find.text('What Is ADHD Burnout?'), findsOneWidget);
+      expect(find.text('How to prevent ADHD burnout?'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

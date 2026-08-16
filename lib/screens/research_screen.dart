@@ -1012,7 +1012,7 @@ class _AutisticBurnoutSection extends StatelessWidget {
   }
 }
 
-// ── Tab 3: ADHD Burnout (placeholder pending research-team wording) ───────────
+// ── Tab 3: ADHD Burnout (research-team-approved content) ─────────────────────
 
 class _AdhdBurnoutSection extends StatelessWidget {
   final bool isMobile;
@@ -1025,61 +1025,68 @@ class _AdhdBurnoutSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const _TabTitle('What Is ADHD Burnout?'),
-        const SizedBox(height: 20),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.accentAmber.withValues(alpha: 0.08),
-            border: Border.all(
-              color: AppColors.accentAmber.withValues(alpha: 0.45),
-              width: 1,
+        const SizedBox(height: 12),
+        const _Body(
+          'ADHD burnout is a deep state of mental, emotional, and physical '
+          'exhaustion caused by the chronic stress of trying to manage, mask, '
+          'and compensate for ADHD symptoms in a demanding world. Experiences '
+          'vary widely from person to person.',
+        ),
+        const SizedBox(height: 24),
+        _InfoCard(
+          icon: Icons.warning_amber_outlined,
+          title: 'What causes ADHD burnout?',
+          children: const [
+            _Body('Causes may include:'),
+            SizedBox(height: 10),
+            _BulletList(
+              items: [
+                'Executive dysfunction strain — sustained effort to manage '
+                    'planning, initiation, and task completion with executive '
+                    'function challenges.',
+                'ADHD masking — suppressing or concealing ADHD traits to meet '
+                    'neurotypical expectations, which requires significant ongoing '
+                    'energy.',
+                'Overcommitting — taking on more obligations than available '
+                    'capacity can support.',
+                'Sensory overload — prolonged exposure to overwhelming sensory '
+                    'input that exceeds the nervous system\'s ability to regulate.',
+                'Emotional dysregulation — intense emotional responses and the '
+                    'effort required to manage them in social or academic settings.',
+              ],
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.hourglass_empty,
-                    color: AppColors.accentAmber,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: A11yHeading(
-                      'Content coming soon',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const _Body(
-                'Research-team-approved content on ADHD burnout has not been '
-                'finalized yet. This section is an intentional placeholder so '
-                'the research team can provide the final wording — covering what '
-                'ADHD burnout is, its causes, prevention and support, and tools '
-                'for recovery — without any invented educational or clinical '
-                'claims in the meantime.',
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Placeholder — awaiting research-team wording.',
-                style: TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 14,
-                  height: 1.5,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _InfoCard(
+          icon: Icons.self_improvement,
+          title: 'How to prevent ADHD burnout?',
+          children: const [
+            _Body(
+              'To prevent ADHD burnout, it is important to protect mental energy '
+              'by setting realistic expectations and planning regular rests and '
+              'resets. Reducing chronic overcommitment, lowering sensory load, and '
+              'creating flexible routines and schedules may also help.',
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _InfoCard(
+          icon: Icons.spa_outlined,
+          title: 'What are tools to alleviate ADHD burnout?',
+          children: const [
+            _Body('Helpful approaches may include:'),
+            SizedBox(height: 10),
+            _BulletList(
+              items: [
+                'Creating study guide plans — structured tools that may help '
+                    'with organization, planning assignments, and managing time '
+                    'more effectively.',
+                'Reducing daily demands — dropping non-essential obligations to '
+                    'create space for recovery.',
+              ],
+            ),
+          ],
         ),
       ],
     );
