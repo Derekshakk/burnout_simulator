@@ -138,10 +138,10 @@ class _PageHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SectionLabel(text: 'RESEARCH'),
+          const SectionLabel(text: 'WHAT IS BURNOUT?'),
           const SizedBox(height: 20),
           A11yHeading(
-            'Research',
+            'What Is Burnout?',
             style: Theme.of(context).textTheme.displayMedium,
           ),
           const SizedBox(height: 16),

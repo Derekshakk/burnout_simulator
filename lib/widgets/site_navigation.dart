@@ -145,7 +145,7 @@ class _SiteNavigationState extends State<SiteNavigation> {
                             onTap: () => _navigate(context, AppRoutes.about),
                           ),
                           _NavLink(
-                            label: 'Research',
+                            label: 'What Is Burnout?',
                             route: AppRoutes.research,
                             activeSection: widget.activeSection,
                             compact: useCompactDesktopLinks,
@@ -480,7 +480,7 @@ class _MobileMenu extends StatelessWidget {
             onTap: () => onNavigate(AppRoutes.about),
           ),
           _MobileMenuItem(
-            label: 'Research',
+            label: 'What Is Burnout?',
             isActive: activeSection == AppRoutes.research,
             onTap: () => onNavigate(AppRoutes.research),
           ),

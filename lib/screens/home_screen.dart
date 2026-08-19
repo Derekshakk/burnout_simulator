@@ -548,7 +548,7 @@ class _ExplorePreviewSection extends StatelessWidget {
               children: [
                 _ExploreCard(
                   icon: Icons.psychology_outlined,
-                  title: 'Research',
+                  title: 'What Is Burnout?',
                   body:
                       'Explore the frameworks behind the project — Universal Design for Learning and the Strength-Based Model — plus research on autistic and ADHD burnout.',
                   buttonLabel: 'Explore the Research',
@@ -573,7 +573,7 @@ class _ExplorePreviewSection extends StatelessWidget {
                   Expanded(
                     child: _ExploreCard(
                       icon: Icons.psychology_outlined,
-                      title: 'Research',
+                      title: 'What Is Burnout?',
                       body:
                           'Explore the frameworks behind the project — Universal Design for Learning and the Strength-Based Model — plus research on autistic and ADHD burnout.',
                       buttonLabel: 'Explore the Research',
